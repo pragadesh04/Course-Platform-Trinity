@@ -1,5 +1,5 @@
 import httpx
-from ..config import settings
+from config import settings
 
 
 async def send_telegram_message(text: str) -> bool:

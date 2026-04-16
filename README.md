@@ -27,7 +27,7 @@ course-better/
 │   │   ├── context/         # React contexts
 │   │   ├── services/        # API services
 │   │   └── styles/          # Global styles
-│   └── ...
+│   └── .
 └── README.md
 ```
 

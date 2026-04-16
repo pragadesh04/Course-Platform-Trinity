@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const PLACEHOLDER_IMAGE = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Course+Better';
 

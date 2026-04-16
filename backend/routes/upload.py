@@ -3,9 +3,9 @@ import cloudinary.uploader
 import io
 from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from typing import Optional
-from ..config import settings
-from ..schemas import UserResponse
-from ..auth import get_admin_user
+from config import settings
+from schemas import UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 

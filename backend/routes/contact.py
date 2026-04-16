@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from ..services.telegram import send_telegram_message, format_contact_message
+from services.telegram import send_telegram_message, format_contact_message
 
 router = APIRouter(prefix="/contact", tags=["Contact"])
 

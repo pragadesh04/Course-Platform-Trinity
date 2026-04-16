@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import datetime
 from bson import ObjectId
-from ..database import users_collection
-from ..schemas import UserCreate, UserLogin, UserResponse, Token, UserRole
-from ..auth import (
+from database import users_collection
+from schemas import UserCreate, UserLogin, UserResponse, Token, UserRole
+from auth import (
     get_password_hash,
     verify_password,
     create_access_token,

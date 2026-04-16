@@ -2,15 +2,15 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
-from ..database import courses_collection, categories_collection
-from ..schemas import (
+from database import courses_collection, categories_collection
+from schemas import (
     CourseCreate,
     CourseUpdate,
     CourseResponse,
     UserResponse,
     CoursePrices,
 )
-from ..auth import get_admin_user, get_current_user
+from auth import get_admin_user, get_current_user
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 

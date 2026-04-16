@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from datetime import datetime
 from bson import ObjectId
-from ..database import testimonials_collection
-from ..schemas import TestimonialCreate, TestimonialResponse, UserResponse
-from ..auth import get_admin_user
+from database import testimonials_collection
+from schemas import TestimonialCreate, TestimonialResponse, UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/testimonials", tags=["Testimonials"])
 

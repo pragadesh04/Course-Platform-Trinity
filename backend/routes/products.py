@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
-from ..database import products_collection
-from ..schemas import ProductCreate, ProductUpdate, ProductResponse, UserResponse
-from ..auth import get_admin_user
+from database import products_collection
+from schemas import ProductCreate, ProductUpdate, ProductResponse, UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/products", tags=["Products"])
 

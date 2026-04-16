@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import routers
+from routes import routers
 
 app = FastAPI(
     title="Trinity API",

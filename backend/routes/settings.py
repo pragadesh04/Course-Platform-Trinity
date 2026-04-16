@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
 from bson import ObjectId
-from ..database import (
+from database import (
     settings_collection,
     users_collection,
     courses_collection,
     products_collection,
     orders_collection,
 )
-from ..schemas import UserResponse
-from ..auth import get_admin_user
+from schemas import UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
 

@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from datetime import datetime
 from bson import ObjectId
-from ..database import categories_collection
-from ..schemas import CategoryCreate, CategoryResponse, UserResponse
-from ..auth import get_admin_user
+from database import categories_collection
+from schemas import CategoryCreate, CategoryResponse, UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 

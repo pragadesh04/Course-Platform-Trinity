@@ -3,14 +3,14 @@ from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
 from pydantic import BaseModel, Field
-from ..database import (
+from database import (
     feedbacks_collection,
     testimonials_collection,
     courses_collection,
     orders_collection,
 )
-from ..schemas import UserResponse, UserRole
-from ..auth import get_current_user, get_admin_user
+from schemas import UserResponse, UserRole
+from auth import get_current_user, get_admin_user
 
 router = APIRouter(prefix="/feedbacks", tags=["Feedbacks"])
 

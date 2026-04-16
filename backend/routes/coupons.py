@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from datetime import datetime
-from ..database import coupons_collection
-from ..schemas import UserResponse
-from ..auth import get_admin_user
+from database import coupons_collection
+from schemas import UserResponse
+from auth import get_admin_user
 
 router = APIRouter(prefix="/coupons", tags=["Coupons"])
 

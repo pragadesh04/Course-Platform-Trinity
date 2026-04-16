@@ -2,14 +2,14 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from datetime import datetime
 from bson import ObjectId
-from ..database import (
+from database import (
     orders_collection,
     courses_collection,
     products_collection,
     users_collection,
 )
-from ..schemas import OrderCreate, OrderResponse, OrderItem, OrderStatus, UserResponse
-from ..auth import get_current_user, get_admin_user
+from schemas import OrderCreate, OrderResponse, OrderItem, OrderStatus, UserResponse
+from auth import get_current_user, get_admin_user
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 

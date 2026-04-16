@@ -3,9 +3,9 @@ from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
 from pydantic import BaseModel
-from ..database import comments_collection, orders_collection
-from ..schemas import UserResponse, UserRole
-from ..auth import get_current_user, get_admin_user
+from database import comments_collection, orders_collection
+from schemas import UserResponse, UserRole
+from auth import get_current_user, get_admin_user
 
 router = APIRouter(prefix="/comments", tags=["Comments"])
 
@@ -38,13 +38,13 @@ class CommentResponse(BaseModel):
 def comment_helper(comment) -> CommentResponse:
     return CommentResponse(
         id=str(comment["_id"]),
-        course_id=comment["course_id"],
-        session_index=comment["session_index"],
-        user_id=comment["user_id"],
-        user_name=comment["user_name"],
-        text=comment["text"],
-        created_at=comment["created_at"],
-        replies=[ReplyModel(**r) for r in comment.get("replies", [])],
+        course_id=str(comment.get("course_id", "")),
+        session_index=int(comment.get("session_index", 0)),
+        user_id=str(comment.get("user_id", "")),
+        user_name=str(comment.get("user_name", "Unknown")),
+        text=str(comment.get("text", "")),
+        created_at=comment.get("created_at") or datetime.utcnow(),
+        replies=[ReplyModel(**r) for r in comment.get("replies", []) if isinstance(r, dict)],
     )
 
 
