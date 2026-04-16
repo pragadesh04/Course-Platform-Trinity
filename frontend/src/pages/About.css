@@ -1,0 +1,125 @@
+.about-page {
+  padding-top: 72px;
+}
+
+.about-hero {
+  background: linear-gradient(135deg, var(--color-charcoal), #2A2A2A);
+  padding: 80px 0;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: clamp(32px, 5vw, 48px);
+  color: var(--color-cream);
+  margin-bottom: 24px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-hero p {
+  color: var(--color-gray-400);
+  font-size: 18px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.about-stats {
+  background: var(--color-cream);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 32px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon {
+  color: var(--color-gold);
+  margin-bottom: 16px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-charcoal);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  color: var(--color-gray-600);
+  font-size: 14px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.mission-content h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: var(--color-charcoal);
+}
+
+.mission-content p {
+  color: var(--color-gray-600);
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.mission-list {
+  list-style: none;
+}
+
+.mission-list li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 12px;
+  color: var(--color-gray-600);
+}
+
+.mission-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-gold);
+  border-radius: 50%;
+}
+
+.mission-image img {
+  width: 100%;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

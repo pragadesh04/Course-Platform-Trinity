@@ -1,0 +1,172 @@
+.session-comments {
+  padding: 24px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  margin-top: 24px;
+}
+
+.session-comments h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: var(--color-charcoal);
+  margin-bottom: 20px;
+}
+
+.comments-loading,
+.comments-login,
+.comments-enroll {
+  text-align: center;
+  color: var(--color-gray-600);
+  padding: 20px;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.comment-item {
+  padding: 16px;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: var(--color-charcoal);
+  font-size: 14px;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: var(--color-gray-400);
+}
+
+.comment-text {
+  color: var(--color-gray-600);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.replies-list {
+  margin-left: 20px;
+  padding-left: 16px;
+  border-left: 2px solid var(--color-gold);
+}
+
+.reply-item {
+  padding: 12px;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+
+.reply-item.admin-reply {
+  border-left: none;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.reply-author {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-gold);
+}
+
+.reply-text {
+  font-size: 13px;
+  color: var(--color-gray-600);
+  margin: 6px 0;
+}
+
+.reply-date {
+  font-size: 11px;
+  color: var(--color-gray-400);
+}
+
+.comment-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--color-gray-600);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-charcoal);
+}
+
+.action-btn.delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.reply-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.reply-form input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.reply-form button {
+  padding: 8px 12px;
+  background: var(--color-gold);
+  color: var(--color-charcoal);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.reply-form .cancel-btn {
+  background: var(--color-gray-200);
+  color: var(--color-gray-600);
+}
+
+.comment-form {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-form input {
+  flex: 1;
+}
+
+.comment-form button {
+  padding: 12px;
+  background: var(--color-gold);
+  color: var(--color-charcoal);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
