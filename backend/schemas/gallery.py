@@ -6,6 +6,7 @@ class GalleryImageBase(BaseModel):
     image_url: str
     title: str = ""
     span: int = 1
+    type: str = "gallery"  # "gallery" or "founder"
 
 
 class GalleryImageCreate(GalleryImageBase):

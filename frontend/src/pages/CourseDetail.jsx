@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Image from '../components/UI/Image';
 import SessionComments from '../components/UI/SessionComments';
 import FeedbackForm from '../components/UI/FeedbackForm';
+import PaymentModal from '../components/UI/PaymentModal';
 import './CourseDetail.css';
 
 export default function CourseDetail() {
@@ -18,6 +19,7 @@ export default function CourseDetail() {
   const [expandedSessions, setExpandedSessions] = useState({});
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [ordering, setOrdering] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     fetchCourse();
@@ -42,9 +44,9 @@ export default function CourseDetail() {
     try {
       const orders = await orderService.getMyOrders();
       const enrolled = orders
-        .filter((o) => o.status === 'delivered')
+        .filter((o) => o.status === 'completed')
         .flatMap((o) => o.items)
-        .filter((item) => item.type === 'course')
+        .filter((item) => item.item_type === 'course')
         .map((item) => item.item_id);
       setEnrolledCourses(enrolled);
     } catch (error) {
@@ -61,7 +63,7 @@ export default function CourseDetail() {
     }));
   };
 
-  const handleEnroll = async () => {
+  const handleEnroll = () => {
     if (!user) {
       navigate('/login', { state: { from: `/courses/${id}` } });
       return;
@@ -70,22 +72,11 @@ export default function CourseDetail() {
       alert('Please select a plan');
       return;
     }
+    setShowPaymentModal(true);
+  };
 
-    setOrdering(true);
-    try {
-      const price = course.prices[selectedPlan];
-      await orderService.create({
-        items: [{ type: 'course', item_id: id }],
-        total_amount: price,
-        plan_type: selectedPlan,
-      });
-      alert('Order placed successfully! Your course will be activated once payment is confirmed.');
-      fetchEnrolledCourses();
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setOrdering(false);
-    }
+  const handlePaymentSuccess = () => {
+    fetchEnrolledCourses();
   };
 
   const formatPrice = (price) => {
@@ -269,11 +260,11 @@ export default function CourseDetail() {
 
                   <button
                     onClick={handleEnroll}
-                    disabled={ordering || !selectedPlan}
+                    disabled={!selectedPlan}
                     className="btn btn-primary btn-lg"
                   >
                     <ShoppingCart size={18} />
-                    {ordering ? 'Processing...' : 'Enroll Now'}
+                    Enroll Now
                   </button>
                 </>
               )}
@@ -291,6 +282,23 @@ export default function CourseDetail() {
           </aside>
         </div>
       </div>
+
+      {selectedPlan && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          items={[{
+            item_id: id,
+            item_type: 'course',
+            title: course.title,
+            price: course.prices[selectedPlan],
+            plan: selectedPlan === 'm3' ? '3m' : selectedPlan === 'm6' ? '6m' : 'lifetime',
+          }]}
+          total={course.prices[selectedPlan]}
+          onSuccess={handlePaymentSuccess}
+          title="Enroll in Course"
+        />
+      )}
     </div>
   );
 }

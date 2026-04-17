@@ -20,6 +20,8 @@ import {
     MessageCircle,
     Star,
     Reply,
+    MoreHorizontal,
+    Home,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/UI/Modal';
@@ -35,6 +37,7 @@ import './Admin.css';
 export default function Admin() {
     const { user, isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     if (!isAdmin) {
         return <Navigate to="/" replace />;
@@ -52,6 +55,8 @@ export default function Admin() {
         { id: 'feedbacks', label: 'Feedbacks', icon: Star },
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
+
+    const mobileTabs = tabs.slice(0, 5);
 
     return (
         <div className="admin-page">
@@ -91,6 +96,59 @@ export default function Admin() {
                 {activeTab === 'feedbacks' && <FeedbacksContent />}
                 {activeTab === 'settings' && <SettingsContent />}
             </main>
+
+            <nav className="mobile-bottom-nav">
+                {mobileTabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        <tab.icon size={20} />
+                        <span>{tab.label}</span>
+                    </button>
+                ))}
+                <button
+                    className="mobile-nav-btn"
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                >
+                    <MoreHorizontal size={20} />
+                    <span>More</span>
+                </button>
+            </nav>
+
+            {showMobileMenu && (
+                <div className="mobile-menu-overlay" onClick={() => setShowMobileMenu(false)}>
+                    <div className="mobile-menu-drawer" onClick={(e) => e.stopPropagation()}>
+                        <div className="mobile-menu-header">
+                            <h3>More Options</h3>
+                            <button onClick={() => setShowMobileMenu(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="mobile-menu-items">
+                            {tabs.slice(5).map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    className={`mobile-menu-item ${activeTab === tab.id ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setActiveTab(tab.id);
+                                        setShowMobileMenu(false);
+                                    }}
+                                >
+                                    <tab.icon size={20} />
+                                    {tab.label}
+                                </button>
+                            ))}
+                            <div className="mobile-menu-divider" />
+                            <Link to="/" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
+                                <Home size={20} />
+                                View Site
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -869,14 +927,20 @@ function TestimonialsContent() {
         e.preventDefault();
         setSaving(true);
         try {
-            await fetch(`${API_URL}/testimonials`, {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/testimonials`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(formData),
             });
-            setShowModal(false);
-            setFormData({ name: '', role: '', text: '', avatar_url: '' });
-            fetchTestimonials();
+            if (res.ok) {
+                setShowModal(false);
+                setFormData({ name: '', role: '', text: '', avatar_url: '' });
+                fetchTestimonials();
+            }
         } catch (error) {
             console.error('Failed to add testimonial:', error);
         } finally {
@@ -887,7 +951,11 @@ function TestimonialsContent() {
     async function handleDelete(id) {
         if (window.confirm('Delete this testimonial?')) {
             try {
-                await fetch(`${API_URL}/testimonials/${id}`, { method: 'DELETE' });
+                const token = localStorage.getItem('course_better_token');
+                await fetch(`${API_URL}/testimonials/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
                 fetchTestimonials();
             } catch (error) {
                 console.error('Failed to delete testimonial:', error);
@@ -967,7 +1035,7 @@ function GalleryContent() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({ image_url: '', title: '', span: 1 });
+    const [formData, setFormData] = useState({ image_url: '', title: '', span: 1, type: 'gallery' });
     const [saving, setSaving] = useState(false);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -977,11 +1045,14 @@ function GalleryContent() {
 
     async function fetchImages() {
         try {
+            setLoading(true);
             const res = await fetch(`${API_URL}/gallery`);
+            if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
-            setImages(data);
+            setImages(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch gallery:', error);
+            setImages([]);
         } finally {
             setLoading(false);
         }
@@ -989,18 +1060,34 @@ function GalleryContent() {
 
     async function handleSubmit(e) {
         e.preventDefault();
+        
+        if (!formData.image_url) {
+            alert('Please upload an image');
+            return;
+        }
+        
         setSaving(true);
         try {
-            await fetch(`${API_URL}/gallery`, {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/gallery`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(formData),
             });
-            setShowModal(false);
-            setFormData({ image_url: '', title: '', span: 1 });
-            fetchImages();
+            if (res.ok) {
+                setShowModal(false);
+                setFormData({ image_url: '', title: '', span: 1, type: 'gallery' });
+                await fetchImages();
+            } else {
+                const error = await res.json();
+                alert(error.detail || 'Failed to save');
+            }
         } catch (error) {
             console.error('Failed to add image:', error);
+            alert('Failed to add image');
         } finally {
             setSaving(false);
         }
@@ -1009,7 +1096,11 @@ function GalleryContent() {
     async function handleDelete(id) {
         if (window.confirm('Delete this image?')) {
             try {
-                await fetch(`${API_URL}/gallery/${id}`, { method: 'DELETE' });
+                const token = localStorage.getItem('course_better_token');
+                await fetch(`${API_URL}/gallery/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
                 fetchImages();
             } catch (error) {
                 console.error('Failed to delete image:', error);
@@ -1035,6 +1126,7 @@ function GalleryContent() {
                             <tr>
                                 <th>Preview</th>
                                 <th>Title</th>
+                                <th>Type</th>
                                 <th>Span</th>
                                 <th>Actions</th>
                             </tr>
@@ -1044,6 +1136,7 @@ function GalleryContent() {
                                 <tr key={img.id}>
                                     <td><img src={img.image_url} alt={img.title} style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8 }} /></td>
                                     <td>{img.title}</td>
+                                    <td><span className={`type-badge ${img.type}`}>{img.type}</span></td>
                                     <td>{img.span}</td>
                                     <td>
                                         <button className="action-btn delete" onClick={() => handleDelete(img.id)}>
@@ -1057,13 +1150,13 @@ function GalleryContent() {
                 </div>
             )}
 
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Add Gallery Image">
+            <Modal isOpen={showModal} onClose={() => { setShowModal(false); setFormData({ image_url: '', title: '', span: 1, type: 'gallery' }); }} title="Add Gallery Image">
                 <form onSubmit={handleSubmit} className="admin-form">
                     <div className="form-group">
-                        <label>Image</label>
+                        <label>Image *</label>
                         <ImageUploader
-                            value={formData.image_url}
-                            onChange={(url) => setFormData({ ...formData, image_url: url })}
+                            value={formData.image_url || ''}
+                            onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
                         />
                     </div>
                     <div className="form-group">
@@ -1073,6 +1166,13 @@ function GalleryContent() {
                     <div className="form-group">
                         <label>Span (1-2)</label>
                         <input type="number" className="input" min={1} max={2} value={formData.span} onChange={(e) => setFormData({ ...formData, span: parseInt(e.target.value) })} />
+                    </div>
+                    <div className="form-group">
+                        <label>Type</label>
+                        <select className="input" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
+                            <option value="gallery">Gallery Image</option>
+                            <option value="founder">Founder Image</option>
+                        </select>
                     </div>
                     <div className="form-actions">
                         <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
@@ -1124,13 +1224,19 @@ function SettingsContent() {
         setSaving(prev => ({ ...prev, founder: true }));
         setMessages(prev => ({ ...prev, founder: '' }));
         try {
-            await fetch(`${API_URL}/settings/founder`, {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/settings/founder`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(founder),
             });
+            if (!res.ok) throw new Error('Failed to save');
             setMessages(prev => ({ ...prev, founder: 'success' }));
         } catch (error) {
+            console.error('Failed to save founder:', error);
             setMessages(prev => ({ ...prev, founder: 'error' }));
         } finally {
             setSaving(prev => ({ ...prev, founder: false }));
@@ -1142,13 +1248,19 @@ function SettingsContent() {
         setSaving(prev => ({ ...prev, about: true }));
         setMessages(prev => ({ ...prev, about: '' }));
         try {
-            await fetch(`${API_URL}/settings/about`, {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/settings/about`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(about),
             });
+            if (!res.ok) throw new Error('Failed to save');
             setMessages(prev => ({ ...prev, about: 'success' }));
         } catch (error) {
+            console.error('Failed to save about:', error);
             setMessages(prev => ({ ...prev, about: 'error' }));
         } finally {
             setSaving(prev => ({ ...prev, about: false }));
@@ -1160,13 +1272,19 @@ function SettingsContent() {
         setSaving(prev => ({ ...prev, contact: true }));
         setMessages(prev => ({ ...prev, contact: '' }));
         try {
-            await fetch(`${API_URL}/settings/contact`, {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/settings/contact`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(contact),
             });
+            if (!res.ok) throw new Error('Failed to save');
             setMessages(prev => ({ ...prev, contact: 'success' }));
         } catch (error) {
+            console.error('Failed to save contact:', error);
             setMessages(prev => ({ ...prev, contact: 'error' }));
         } finally {
             setSaving(prev => ({ ...prev, contact: false }));
@@ -1266,8 +1384,8 @@ function SettingsContent() {
                 <div className="form-group">
                     <label>Image</label>
                     <ImageUploader
-                        value={founder.image_url}
-                        onChange={(url) => setFounder({ ...founder, image_url: url })}
+                        value={founder.image_url || ''}
+                        onChange={(url) => setFounder(prev => ({ ...prev, image_url: url }))}
                     />
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={saving.founder}>

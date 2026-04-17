@@ -11,6 +11,7 @@ from .contact import router as contact_router
 from .comments import router as comments_router
 from .feedbacks import router as feedbacks_router
 from .coupons import router as coupons_router
+from .payments import router as payments_router
 
 routers = [
     auth_router,
@@ -26,4 +27,5 @@ routers = [
     comments_router,
     feedbacks_router,
     coupons_router,
+    payments_router,
 ]

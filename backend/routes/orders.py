@@ -20,9 +20,14 @@ def order_helper(order) -> OrderResponse:
         user_id=order["user_id"],
         items=[OrderItem(**item) for item in order["items"]],
         total=order["total"],
-        payment_method=order["payment_method"],
+        coupon_code=order.get("coupon_code"),
+        coupon_discount=order.get("coupon_discount"),
+        razorpay_order_id=order.get("razorpay_order_id"),
+        razorpay_payment_id=order.get("razorpay_payment_id"),
+        razorpay_signature=order.get("razorpay_signature"),
         status=OrderStatus(order["status"]),
         created_at=order["created_at"],
+        paid_at=order.get("paid_at"),
     )
 
 

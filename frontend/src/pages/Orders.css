@@ -271,3 +271,70 @@
   padding: 80px 0;
   color: var(--color-gray-600);
 }
+
+@media (max-width: 768px) {
+  .orders-header {
+    padding: 32px 0;
+  }
+
+  .orders-header h1 {
+    font-size: 24px;
+  }
+
+  .dashboard-tabs {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .order-card {
+    padding: 16px;
+  }
+
+  .order-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .order-item {
+    flex-wrap: wrap;
+  }
+
+  .item-title {
+    width: 100%;
+    order: 1;
+  }
+
+  .item-type {
+    order: 0;
+  }
+
+  .item-price {
+    order: 2;
+  }
+
+  .order-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .order-meta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .empty-state {
+    padding: 48px 16px;
+  }
+}

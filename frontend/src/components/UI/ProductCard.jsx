@@ -4,7 +4,11 @@ import { ShoppingBag, Tag } from 'lucide-react';
 import Image from './Image';
 import './ProductCard.css';
 
+const PRODUCT_PLACEHOLDER = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Product';
+
 export default function ProductCard({ product }) {
+  const thumbnailSrc = product.thumbnail_url || PRODUCT_PLACEHOLDER;
+
   return (
     <motion.div
       className="product-card"
@@ -13,9 +17,9 @@ export default function ProductCard({ product }) {
     >
       <div className="product-thumbnail">
         <Image 
-          src={product.thumbnail_url} 
+          src={thumbnailSrc} 
           alt={product.title}
-          fallback="https://placehold.co/600x400/D4AF37/1A1A1A?text=Product"
+          fallback={PRODUCT_PLACEHOLDER}
         />
         {product.featured && (
           <div className="product-badge">Featured</div>

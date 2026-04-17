@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ShoppingBag, Check, Tag, ArrowLeft } from 'lucide-react';
-import { productService, orderService } from '../services/api';
+import { productService } from '../services/api';
 import Image from '../components/UI/Image';
+import PaymentModal from '../components/UI/PaymentModal';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -10,7 +11,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [ordering, setOrdering] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     fetchProduct();
@@ -27,25 +28,12 @@ export default function ProductDetail() {
     }
   };
 
-  const handleBuyNow = async () => {
-    setOrdering(true);
-    try {
-      await orderService.create({
-        items: [{ 
-          item_id: product.id, 
-          item_type: 'product', 
-          title: product.title, 
-          price: product.price 
-        }],
-        payment_method: 'gpay',
-      });
-      alert('Order placed successfully! You will receive a WhatsApp message for payment.');
-      navigate('/orders');
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setOrdering(false);
-    }
+  const handleBuyNow = () => {
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    navigate('/orders');
   };
 
   const handleAddToCart = () => {
@@ -144,10 +132,9 @@ export default function ProductDetail() {
               <button 
                 className="btn btn-primary btn-lg"
                 onClick={handleBuyNow}
-                disabled={ordering}
               >
                 <ShoppingBag size={18} />
-                {ordering ? 'Processing...' : 'Buy Now'}
+                Buy Now
               </button>
               <button 
                 className="btn btn-outline btn-lg"
@@ -159,6 +146,20 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        items={[{
+          item_id: product.id,
+          item_type: 'product',
+          title: product.title,
+          price: product.price,
+        }]}
+        total={product.price}
+        onSuccess={handlePaymentSuccess}
+        title="Complete Your Purchase"
+      />
     </div>
   );
 }

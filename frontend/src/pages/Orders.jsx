@@ -160,7 +160,9 @@ export default function Orders() {
                         <Clock size={14} />
                         {new Date(order.created_at).toLocaleDateString()}
                       </span>
-                      <span className="payment-method">{order.payment_method}</span>
+                      {order.razorpay_payment_id && (
+                        <span className="payment-id">Razorpay: {order.razorpay_payment_id.slice(-6)}</span>
+                      )}
                     </div>
                     <div className="order-total">
                       Total: <strong>₹{order.total}</strong>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Scissors, Package } from 'lucide-react';
+import { ArrowRight, Sparkles, Scissors, Package, User } from 'lucide-react';
 import Carousel from '../components/UI/Carousel';
 import CourseCard from '../components/UI/CourseCard';
 import ProductCard from '../components/UI/ProductCard';
@@ -15,6 +15,7 @@ export default function Home() {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [testimonials, setTestimonials] = useState([]);
     const [gallery, setGallery] = useState([]);
+    const [founderImages, setFounderImages] = useState([]);
     const [founder, setFounder] = useState(null);
     const [stats, setStats] = useState({ students: 0, students_display: '0' });
     const [loading, setLoading] = useState(true);
@@ -34,7 +35,9 @@ export default function Home() {
                 setFeaturedCourses(courses.slice(0, 4));
                 setFeaturedProducts(products.slice(0, 4));
                 setTestimonials(testimonialsData);
-                setGallery(galleryData);
+                const galleryItems = Array.isArray(galleryData) ? galleryData : [];
+                setGallery(galleryItems.filter(item => item.type !== 'founder'));
+                setFounderImages(galleryItems.filter(item => item.type === 'founder'));
                 setFounder(founderData);
                 setStats(statsData);
             } catch (error) {
@@ -101,10 +104,21 @@ export default function Home() {
                 <div className="container">
                     <div className="founder-grid">
                         <AnimatedSection className="founder-image">
-                            <img
-                                src={founder?.image_url || "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=500"}
-                                alt={founder?.name || "Founder"}
-                            />
+                            {loading ? (
+                                <div className="founder-placeholder loading">
+                                    <div className="placeholder-spinner" />
+                                </div>
+                            ) : founderImages[0]?.image_url || founder?.image_url ? (
+                                <img
+                                    src={founderImages[0]?.image_url || founder?.image_url}
+                                    alt={founder?.name || "Founder"}
+                                />
+                            ) : (
+                                <div className="founder-placeholder">
+                                    <User size={64} strokeWidth={1} />
+                                    <span>Founder Image</span>
+                                </div>
+                            )}
                         </AnimatedSection>
                         <AnimatedSection className="founder-content" delay={0.2}>
                             <span className="section-label">Our Story</span>

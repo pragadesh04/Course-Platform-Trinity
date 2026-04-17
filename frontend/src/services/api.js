@@ -31,6 +31,9 @@ class ApiService {
       const data = await response.json();
       
       if (!response.ok) {
+        if (Array.isArray(data.detail)) {
+          throw new Error(data.detail.map(e => e.loc ? `${e.loc.join('.')}: ${e.msg}` : String(e)).join(', '));
+        }
         throw new Error(data.detail || 'Request failed');
       }
       

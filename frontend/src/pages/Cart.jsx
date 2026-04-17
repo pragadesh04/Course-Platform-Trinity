@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Image from '../components/UI/Image';
+import PaymentModal from '../components/UI/PaymentModal';
+import { API_BASE_URL } from '../config';
 import './Cart.css';
 
 export default function Cart() {
@@ -11,6 +13,7 @@ export default function Cart() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -49,7 +52,7 @@ export default function Cart() {
     setCouponError('');
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/coupons/validate`, {
+      const response = await fetch(`${API_BASE_URL}/coupons/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: couponCode }),
@@ -70,45 +73,19 @@ export default function Cart() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-  const discount = couponDiscount.type === 'percentage' 
-    ? (subtotal * couponDiscount.value) / 100 
-    : couponDiscount.value;
+  const discount = couponDiscount?.type === 'percentage' 
+    ? (subtotal * (couponDiscount?.value || 0)) / 100 
+    : (couponDiscount?.value || 0);
   const total = Math.max(0, subtotal - discount);
 
-  const handleCheckout = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('course_better_token')}`,
-        },
-        body: JSON.stringify({
-          items: cart.map(item => ({
-            item_id: item.item_id,
-            item_type: item.item_type,
-            title: item.title,
-            price: item.price,
-            quantity: item.quantity || 1,
-          })),
-          payment_method: 'gpay',
-          coupon_code: couponCode || null,
-          discount: discount,
-        }),
-      });
+  const handleCheckout = () => {
+    setShowPaymentModal(true);
+  };
 
-      if (response.ok) {
-        localStorage.removeItem('cart');
-        window.dispatchEvent(new Event('cartUpdated'));
-        alert('Order placed successfully! You will receive a WhatsApp message for payment.');
-        navigate('/orders');
-      } else {
-        const data = await response.json();
-        alert(data.detail || 'Checkout failed');
-      }
-    } catch (error) {
-      alert('Checkout failed. Please try again.');
-    }
+  const handlePaymentSuccess = () => {
+    localStorage.removeItem('cart');
+    window.dispatchEvent(new Event('cartUpdated'));
+    navigate('/orders');
   };
 
   if (cart.length === 0) {
@@ -214,6 +191,22 @@ export default function Cart() {
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        items={cart.map(item => ({
+          item_id: item.item_id,
+          item_type: item.item_type,
+          title: item.title,
+          price: item.price,
+        }))}
+        total={total}
+        couponCode={couponCode || null}
+        couponDiscount={discount}
+        onSuccess={handlePaymentSuccess}
+        title="Complete Your Purchase"
+      />
     </div>
   );
 }

@@ -90,3 +90,22 @@
   background: var(--color-gray-200);
   color: var(--color-gray-600);
 }
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 80px 16px 40px;
+  }
+
+  .profile-card {
+    padding: 24px 16px;
+  }
+
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .profile-form .input {
+    font-size: 16px;
+  }
+}

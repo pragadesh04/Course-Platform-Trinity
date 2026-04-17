@@ -21,6 +21,10 @@ export default function Navbar() {
     return () => window.removeEventListener('cartUpdated', updateCartCount);
   }, []);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
+
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/courses', label: 'Courses' },

@@ -148,6 +148,49 @@
   box-shadow: var(--shadow-lg);
 }
 
+.founder-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--color-gray-400);
+  box-shadow: var(--shadow-lg);
+}
+
+.founder-placeholder span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.founder-placeholder.loading {
+  background: linear-gradient(90deg, var(--color-gray-200) 25%, var(--color-gray-100) 50%, var(--color-gray-200) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.placeholder-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-gray-300);
+  border-top-color: var(--color-gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .founder-content blockquote {
   font-family: var(--font-heading);
   font-size: 22px;
@@ -338,6 +381,70 @@
   }
 
   .hero-title {
-    font-size: 32px;
+    font-size: clamp(28px, 8vw, 48px);
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-float-card {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: 16px;
+    justify-content: center;
+  }
+
+  .founder-image img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .founder-content blockquote {
+    font-size: 18px;
+  }
+
+  .testimonial-slide {
+    padding: 0 8px;
+  }
+
+  .testimonial-card {
+    padding: 24px 16px;
+  }
+
+  .section-title h2 {
+    font-size: clamp(24px, 6vw, 36px);
+  }
+
+  .cta-content h2 {
+    font-size: clamp(24px, 6vw, 36px);
+  }
+
+  .courses-grid,
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 80px 16px 40px;
+    min-height: auto;
+  }
+
+  .btn-lg {
+    padding: 14px 24px;
+    font-size: 15px;
   }
 }

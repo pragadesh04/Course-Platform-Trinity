@@ -1,13 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import './ImageUploader.css';
 
-export default function ImageUploader({ value, onChange, label = "Upload Image" }) {
+export default function ImageUploader({ value = '', onChange, label = "Upload Image" }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState(value);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    setCurrentUrl(value);
+  }, [value]);
 
   const handleFile = async (file) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -34,13 +39,19 @@ export default function ImageUploader({ value, onChange, label = "Upload Image" 
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Upload failed');
+      }
 
       const data = await response.json();
-      onChange(data.url);
+      const uploadedUrl = data.url;
+      
+      setCurrentUrl(uploadedUrl);
+      onChange(uploadedUrl);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image');
+      alert(error.message || 'Failed to upload image');
     } finally {
       setUploading(false);
       setProgress(0);
@@ -63,19 +74,30 @@ export default function ImageUploader({ value, onChange, label = "Upload Image" 
     setDragOver(false);
   };
 
-  const handleRemove = async () => {
+  const handleRemove = () => {
+    setCurrentUrl('');
     onChange('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleChangeClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
   };
 
   return (
     <div className="image-uploader">
       {label && <label className="uploader-label">{label}</label>}
       
-      {value ? (
+      {currentUrl ? (
         <div className="image-preview">
-          <img src={value} alt="Preview" />
+          <img src={currentUrl} alt="Preview" />
           <div className="preview-overlay">
-            <button type="button" className="btn-change" onClick={() => fileInputRef.current?.click()}>
+            <button type="button" className="btn-change" onClick={handleChangeClick}>
               Change
             </button>
             <button type="button" className="btn-remove" onClick={handleRemove}>

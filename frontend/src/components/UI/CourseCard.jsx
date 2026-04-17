@@ -4,6 +4,8 @@ import { Play, Clock, Users } from 'lucide-react';
 import Image from './Image';
 import './CourseCard.css';
 
+const COURSE_PLACEHOLDER = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Course';
+
 export default function CourseCard({ course }) {
   const formatPrice = (price) => {
     if (price === 0) return 'Free';
@@ -18,6 +20,8 @@ export default function CourseCard({ course }) {
       )
     : 0;
 
+  const thumbnailSrc = course.thumbnail_url || COURSE_PLACEHOLDER;
+
   return (
     <motion.div
       className="course-card"
@@ -26,9 +30,9 @@ export default function CourseCard({ course }) {
     >
       <div className="course-thumbnail">
         <Image 
-          src={course.thumbnail_url} 
+          src={thumbnailSrc} 
           alt={course.title}
-          fallback="https://placehold.co/600x400/D4AF37/1A1A1A?text=Course"
+          fallback={COURSE_PLACEHOLDER}
         />
         <div className="course-sessions">
           {course.sessions || 0} Sessions

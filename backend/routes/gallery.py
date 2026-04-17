@@ -15,6 +15,7 @@ def gallery_helper(image) -> GalleryImageResponse:
         image_url=image["image_url"],
         title=image.get("title", ""),
         span=image.get("span", 1),
+        type=image.get("type", "gallery"),
         created_at=image["created_at"],
     )
 
