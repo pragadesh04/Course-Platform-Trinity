@@ -97,7 +97,7 @@ export default function Profile() {
 
           <button type="submit" className="btn btn-primary" disabled={saving}>
             <Save size={18} />
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving.' : 'Save Changes'}
           </button>
         </form>
       </motion.div>

@@ -111,7 +111,7 @@ export default function SessionComments({ courseId, sessionIndex, isEnrolled }) 
       <h4><MessageCircle size={20} /> Comments ({comments.length})</h4>
 
       {loading ? (
-        <p className="comments-loading">Loading comments...</p>
+        <p className="comments-loading">Loading comments.</p>
       ) : (
         <div className="comments-list">
           {comments.map((comment) => (
@@ -152,7 +152,7 @@ export default function SessionComments({ courseId, sessionIndex, isEnrolled }) 
                   <input
                     type="text"
                     className="input"
-                    placeholder="Write a reply..."
+                    placeholder="Write a reply."
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                   />
@@ -174,7 +174,7 @@ export default function SessionComments({ courseId, sessionIndex, isEnrolled }) 
           <input
             type="text"
             className="input"
-            placeholder="Write a comment..."
+            placeholder="Write a comment."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
           />

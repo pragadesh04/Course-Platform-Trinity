@@ -198,7 +198,7 @@ export default function Cart() {
                 onClick={applyCoupon}
                 disabled={applyingCoupon}
               >
-                {applyingCoupon ? 'Applying...' : 'Apply'}
+                {applyingCoupon ? 'Applying.' : 'Apply'}
               </button>
             </div>
             {couponError && <p className="coupon-error">{couponError}</p>}

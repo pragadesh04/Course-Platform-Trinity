@@ -104,7 +104,7 @@ export default function ImageUploader({ value, onChange, label = "Upload Image" 
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${progress}%` }} />
               </div>
-              <span>Uploading...</span>
+              <span>Uploading.</span>
             </div>
           ) : (
             <>

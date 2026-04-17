@@ -51,7 +51,7 @@ export default function Courses() {
             <Search size={20} />
             <input
               type="text"
-              placeholder="Search courses..."
+              placeholder="Search courses."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input"

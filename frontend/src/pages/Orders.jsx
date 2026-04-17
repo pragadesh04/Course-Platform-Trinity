@@ -74,7 +74,7 @@ export default function Orders() {
         </div>
 
         {loading ? (
-          <div className="loading">Loading...</div>
+          <div className="loading">Loading.</div>
         ) : activeTab === 'courses' ? (
           <div className="enrolled-courses">
             {enrolledCourses.length > 0 ? (
@@ -101,7 +101,7 @@ export default function Orders() {
                     </div>
                     <div className="course-info">
                       <h3>{course.title}</h3>
-                      <p>{course.description?.substring(0, 100)}...</p>
+                      <p>{course.description?.substring(0, 100)}.</p>
                       <Link to={`/courses/${course.id}`} className="btn btn-primary">
                         <Play size={16} /> Continue Learning
                       </Link>

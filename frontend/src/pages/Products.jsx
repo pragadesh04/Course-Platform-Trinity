@@ -52,7 +52,7 @@ export default function Products() {
             <Search size={20} />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input"

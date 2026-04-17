@@ -74,7 +74,7 @@ export default function ProductDetail() {
     return (
       <div className="product-detail-loading">
         <div className="spinner" />
-        <p>Loading product...</p>
+        <p>Loading product.</p>
       </div>
     );
   }
@@ -147,7 +147,7 @@ export default function ProductDetail() {
                 disabled={ordering}
               >
                 <ShoppingBag size={18} />
-                {ordering ? 'Processing...' : 'Buy Now'}
+                {ordering ? 'Processing.' : 'Buy Now'}
               </button>
               <button 
                 className="btn btn-outline btn-lg"

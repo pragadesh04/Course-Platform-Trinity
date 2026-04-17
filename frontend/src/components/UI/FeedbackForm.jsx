@@ -96,14 +96,14 @@ export default function FeedbackForm({ courseId, isEnrolled, onSubmit }) {
       <textarea
         className="input"
         rows={4}
-        placeholder="Share your experience with this course..."
+        placeholder="Share your experience with this course."
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
       <button type="submit" className="btn btn-primary" disabled={submitting || rating === 0}>
         <Send size={16} />
-        {submitting ? 'Submitting...' : 'Submit Feedback'}
+        {submitting ? 'Submitting.' : 'Submit Feedback'}
       </button>
     </form>
   );

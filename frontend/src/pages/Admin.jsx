@@ -33,8 +33,12 @@ import {
 import './Admin.css';
 
 export default function Admin() {
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, loading } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
+
+    if (loading) {
+        return <div className="admin-loading">Loading.</div>;
+    }
 
     if (!isAdmin) {
         return <Navigate to="/" replace />;
@@ -57,7 +61,7 @@ export default function Admin() {
         <div className="admin-page">
             <aside className="admin-sidebar">
                 <div className="sidebar-header">
-                    <h3>Admin Panel</h3>
+                    <h3>Admin</h3>
                 </div>
                 <nav className="sidebar-nav">
                     {tabs.map((tab) => (
@@ -67,14 +71,14 @@ export default function Admin() {
                             onClick={() => setActiveTab(tab.id)}
                         >
                             <tab.icon size={20} />
-                            {tab.label}
+                            <span className="sidebar-label">{tab.label}</span>
                         </button>
                     ))}
                 </nav>
                 <div className="sidebar-footer">
                     <Link to="/" className="sidebar-link">
                         <Eye size={20} />
-                        View Site
+                        <span className="sidebar-label">View Site</span>
                     </Link>
                 </div>
             </aside>
@@ -91,6 +95,19 @@ export default function Admin() {
                 {activeTab === 'feedbacks' && <FeedbacksContent />}
                 {activeTab === 'settings' && <SettingsContent />}
             </main>
+
+            <nav className="admin-mobile-nav">
+                {tabs.slice(0, 5).map((tab) => (
+                    <button
+                        key={tab.id}
+                        className={`mobile-nav-item ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        <tab.icon size={22} />
+                        <span className="mobile-nav-label">{tab.label}</span>
+                    </button>
+                ))}
+            </nav>
         </div>
     );
 }
@@ -205,7 +222,7 @@ function CoursesContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -333,7 +350,7 @@ function CourseForm({ course, onClose, onSave }) {
                 <textarea
                     className="input"
                     rows={5}
-                    placeholder="https://youtube.com/watch?v=..."
+                    placeholder="https://youtube.com/watch?v=."
                     value={formData.video_links}
                     onChange={(e) => setFormData({ ...formData, video_links: e.target.value })}
                 />
@@ -391,7 +408,7 @@ function CourseForm({ course, onClose, onSave }) {
                     Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Course'}
+                    {saving ? 'Saving.' : 'Save Course'}
                 </button>
             </div>
         </form>
@@ -441,7 +458,7 @@ function ProductsContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -604,7 +621,7 @@ function ProductForm({ product, onClose, onSave }) {
                     Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Product'}
+                    {saving ? 'Saving.' : 'Save Product'}
                 </button>
             </div>
         </form>
@@ -654,7 +671,7 @@ function CategoriesContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -773,7 +790,7 @@ function CategoryForm({ category, onClose, onSave }) {
                     Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Category'}
+                    {saving ? 'Saving.' : 'Save Category'}
                 </button>
             </div>
         </form>
@@ -806,7 +823,7 @@ function OrdersContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -905,7 +922,7 @@ function TestimonialsContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -922,7 +939,7 @@ function TestimonialsContent() {
                                 <tr key={t.id}>
                                     <td>{t.name}</td>
                                     <td>{t.role}</td>
-                                    <td>{t.text.substring(0, 50)}...</td>
+                                    <td>{t.text.substring(0, 50)}.</td>
                                     <td>
                                         <button className="action-btn delete" onClick={() => handleDelete(t.id)}>
                                             <Trash2 size={16} />
@@ -955,7 +972,7 @@ function TestimonialsContent() {
                     </div>
                     <div className="form-actions">
                         <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving.' : 'Save'}</button>
                     </div>
                 </form>
             </Modal>
@@ -1027,7 +1044,7 @@ function GalleryContent() {
             </div>
 
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -1076,7 +1093,7 @@ function GalleryContent() {
                     </div>
                     <div className="form-actions">
                         <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving.' : 'Save'}</button>
                     </div>
                 </form>
             </Modal>
@@ -1174,7 +1191,7 @@ function SettingsContent() {
     }
 
     if (loading) {
-        return <div className="admin-content"><div className="loading">Loading...</div></div>;
+        return <div className="admin-content"><div className="loading">Loading.</div></div>;
     }
 
     return (
@@ -1202,7 +1219,7 @@ function SettingsContent() {
                     <textarea className="input" rows={3} value={about.mission} onChange={(e) => setAbout({ ...about, mission: e.target.value })} />
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={saving.about}>
-                    {saving.about ? 'Saving...' : 'Save About Settings'}
+                    {saving.about ? 'Saving.' : 'Save About Settings'}
                 </button>
             </form>
 
@@ -1241,7 +1258,7 @@ function SettingsContent() {
                     <input type="text" className="input" value={contact.facebook} onChange={(e) => setContact({ ...contact, facebook: e.target.value })} />
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={saving.contact}>
-                    {saving.contact ? 'Saving...' : 'Save Contact Settings'}
+                    {saving.contact ? 'Saving.' : 'Save Contact Settings'}
                 </button>
             </form>
 
@@ -1271,7 +1288,7 @@ function SettingsContent() {
                     />
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={saving.founder}>
-                    {saving.founder ? 'Saving...' : 'Save Founder Settings'}
+                    {saving.founder ? 'Saving.' : 'Save Founder Settings'}
                 </button>
             </form>
         </div>
@@ -1303,9 +1320,10 @@ function CommentsContent() {
                 headers: getHeaders(),
             });
             const data = await res.json();
-            setComments(data);
+            setComments(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch comments:', error);
+            setComments([]);
         } finally {
             setLoading(false);
         }
@@ -1346,7 +1364,7 @@ function CommentsContent() {
         <div className="admin-content">
             <h1>Comments</h1>
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -1366,7 +1384,7 @@ function CommentsContent() {
                                     <td>{c.user_name}</td>
                                     <td>{c.course_id}</td>
                                     <td>Session {c.session_index + 1}</td>
-                                    <td>{c.text.substring(0, 50)}...</td>
+                                    <td>{c.text.substring(0, 50)}.</td>
                                     <td>{formatDate(c.created_at)}</td>
                                     <td>
                                         <button className="action-btn" onClick={() => setReplyModal(c)}>
@@ -1453,7 +1471,7 @@ function FeedbacksContent() {
         <div className="admin-content">
             <h1>Feedbacks</h1>
             {loading ? (
-                <div className="loading">Loading...</div>
+                <div className="loading">Loading.</div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -1473,7 +1491,7 @@ function FeedbacksContent() {
                                     <td>{f.user_name}</td>
                                     <td>{f.course_title || f.course_id}</td>
                                     <td>{renderStars(f.rating)}</td>
-                                    <td>{f.text.substring(0, 50)}...</td>
+                                    <td>{f.text.substring(0, 50)}.</td>
                                     <td>{f.testimonial_id ? 'Yes' : 'No'}</td>
                                     <td>
                                         <button className="action-btn delete" onClick={() => handleDelete(f.id)}>

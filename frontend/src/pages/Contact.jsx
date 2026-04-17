@@ -203,7 +203,7 @@ export default function Contact() {
 
                 <button type="submit" className="btn btn-primary btn-full" disabled={sending}>
                   <Send size={18} />
-                  {sending ? 'Sending...' : 'Send Message'}
+                  {sending ? 'Sending.' : 'Send Message'}
                 </button>
               </form>
             </motion.div>

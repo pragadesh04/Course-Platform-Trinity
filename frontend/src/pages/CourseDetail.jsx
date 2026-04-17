@@ -106,7 +106,7 @@ export default function CourseDetail() {
     return (
       <div className="course-detail-loading">
         <div className="spinner" />
-        <p>Loading course...</p>
+        <p>Loading course.</p>
       </div>
     );
   }
@@ -273,7 +273,7 @@ export default function CourseDetail() {
                     className="btn btn-primary btn-lg"
                   >
                     <ShoppingCart size={18} />
-                    {ordering ? 'Processing...' : 'Enroll Now'}
+                    {ordering ? 'Processing.' : 'Enroll Now'}
                   </button>
                 </>
               )}
@@ -291,6 +291,19 @@ export default function CourseDetail() {
           </aside>
         </div>
       </div>
+
+      {!isEnrolled && selectedPlan && (
+        <div className="mobile-enroll-bar">
+          <span className="price">{formatPrice(course.prices[selectedPlan])}</span>
+          <button
+            onClick={handleEnroll}
+            disabled={ordering}
+            className="btn btn-primary"
+          >
+            {ordering ? 'Processing.' : 'Enroll Now'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

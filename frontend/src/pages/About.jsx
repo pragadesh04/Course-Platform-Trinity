@@ -69,7 +69,7 @@ export default function About() {
               <AnimatedSection key={index} delay={index * 0.1}>
                 <div className="stat-item">
                   <stat.icon size={32} className="stat-icon" />
-                  <span className="stat-value">{loading ? '...' : stat.value}</span>
+                  <span className="stat-value">{loading ? '.' : stat.value}</span>
                   <span className="stat-label">{stat.label}</span>
                 </div>
               </AnimatedSection>

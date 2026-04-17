@@ -6,10 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [mobile_number, setMobile] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    mobile_number: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -19,12 +21,12 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (password.length < 6) {
+    if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
@@ -32,7 +34,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(name, mobile_number, password);
+      await register(formData.name, formData.mobile_number, formData.password);
       navigate('/');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -69,8 +71,8 @@ export default function Register() {
                 type="text"
                 className="input"
                 placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
             </div>
@@ -84,8 +86,8 @@ export default function Register() {
                 type="tel"
                 className="input"
                 placeholder="Enter mobile number"
-                value={mobile_number}
-                onChange={(e) => setMobile(e.target.value)}
+                value={formData.mobile_number}
+                onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
                 required
               />
             </div>
@@ -99,8 +101,8 @@ export default function Register() {
                 type="password"
                 className="input"
                 placeholder="Create password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
             </div>
@@ -114,15 +116,15 @@ export default function Register() {
                 type="password"
                 className="input"
                 placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
               />
             </div>
           </div>
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? 'Creating Account.' : 'Create Account'}
           </button>
         </form>
 
