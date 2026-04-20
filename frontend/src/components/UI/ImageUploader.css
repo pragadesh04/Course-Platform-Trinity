@@ -23,6 +23,12 @@
   transition: all var(--transition-fast);
 }
 
+.upload-area:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.05);
+}
+
 .upload-area:hover,
 .upload-area.drag-over {
   border-color: var(--color-gold);
@@ -104,8 +110,15 @@
 }
 
 .image-preview:hover .preview-overlay,
-.image-preview:focus-within .preview-overlay {
+.image-preview:focus-within .preview-overlay,
+.image-preview:active .preview-overlay {
   opacity: 1;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .image-preview .preview-overlay {
+    opacity: 1;
+  }
 }
 
 .btn-change {

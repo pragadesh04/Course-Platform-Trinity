@@ -82,9 +82,17 @@ export default function ImageUploader({ value = '', onChange, label = "Upload Im
     }
   };
 
-  const handleChangeClick = () => {
+  const handleChangeClick = (e) => {
+    e?.stopPropagation();
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleUploadAreaClick = (e) => {
+    if (uploading) return;
+    if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
@@ -111,12 +119,20 @@ export default function ImageUploader({ value = '', onChange, label = "Upload Im
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          onClick={() => !uploading && fileInputRef.current?.click()}
+          onClick={handleUploadAreaClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleUploadAreaClick();
+            }
+          }}
         >
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            capture="environment"
             onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
             style={{ display: 'none' }}
           />
