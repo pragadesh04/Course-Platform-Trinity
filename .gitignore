@@ -4,5 +4,4 @@ node_modules
 __pycache__
 .env
 venv314
-errors.md
-added_features.md
+markdowns

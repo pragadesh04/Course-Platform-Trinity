@@ -133,7 +133,8 @@ async def update_course(
     update_data = course_data.model_dump(exclude_unset=True)
 
     if "prices" in update_data and update_data["prices"]:
-        update_data["prices"] = update_data["prices"].model_dump()
+
+        update_data["prices"] = update_data["prices"]
 
     if "video_links" in update_data:
         update_data["sessions"] = len(update_data["video_links"])
