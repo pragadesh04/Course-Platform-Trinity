@@ -132,7 +132,6 @@ export default function ImageUploader({ value = '', onChange, label = "Upload Im
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
             style={{ display: 'none' }}
           />
