@@ -33,6 +33,7 @@ import {
     orderService,
 } from '../services/api';
 import './Admin.css';
+import { API_BASE_URL } from '../config';
 
 export default function Admin() {
     const { user, isAdmin } = useAuth();
@@ -159,7 +160,7 @@ function DashboardContent() {
     useEffect(() => {
         async function fetchStats() {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/settings/stats`);
+                const response = await fetch(`${API_BASE_URL || 'http://localhost:8000'}/settings/stats`);
                 if (response.ok) {
                     const data = await response.json();
                     setStats(data);
@@ -905,7 +906,7 @@ function TestimonialsContent() {
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ name: '', role: '', text: '', avatar_url: '' });
     const [saving, setSaving] = useState(false);
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
         fetchTestimonials();
@@ -1037,7 +1038,7 @@ function GalleryContent() {
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ image_url: '', title: '', span: 1, type: 'gallery' });
     const [saving, setSaving] = useState(false);
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
         fetchImages();
@@ -1191,7 +1192,7 @@ function SettingsContent() {
     const [saving, setSaving] = useState({ founder: false, about: false, contact: false });
     const [messages, setMessages] = useState({ founder: '', about: '', contact: '' });
     const [loading, setLoading] = useState(true);
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
         fetchAllSettings();
@@ -1401,7 +1402,7 @@ function CommentsContent() {
     const [loading, setLoading] = useState(true);
     const [replyModal, setReplyModal] = useState(null);
     const [replyText, setReplyText] = useState('');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
         fetchComments();
@@ -1520,7 +1521,7 @@ function CommentsContent() {
 function FeedbacksContent() {
     const [feedbacks, setFeedbacks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL || 'http://localhost:8000';
 
     const getHeaders = () => {
         const token = localStorage.getItem('course_better_token');

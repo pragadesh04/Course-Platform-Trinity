@@ -1,4 +1,7 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const envApiUrl = import.meta.env.VITE_API_BASE_URL;
+console.log('[Config] VITE_API_BASE_URL:', envApiUrl || '(not set)');
+
+export const API_BASE_URL = envApiUrl || 'http://localhost:8000';
 
 export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
 
