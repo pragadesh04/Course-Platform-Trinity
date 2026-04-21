@@ -68,9 +68,12 @@
 
 .category-filter .input {
   border: none;
-  padding: 0;
-  min-width: 180px;
+  padding: 4px;
+  min-width: 200px;
   background: transparent;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .category-filter .input:focus {

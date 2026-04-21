@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from datetime import datetime
-from bson import ObjectId
 from database import (
     settings_collection,
     users_collection,

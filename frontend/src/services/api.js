@@ -98,6 +98,8 @@ export const courseService = {
   create: (data) => api.post('/courses', data),
   update: (id, data) => api.put(`/courses/${id}`, data),
   delete: (id) => api.delete(`/courses/${id}`),
+  getProgress: (courseId) => api.get(`/courses/${courseId}/progress`),
+  saveProgress: (courseId, data) => api.post(`/courses/${courseId}/progress`, data),
 };
 
 export const productService = {

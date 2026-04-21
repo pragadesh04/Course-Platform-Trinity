@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -22,6 +22,7 @@ import {
     Reply,
     MoreHorizontal,
     Home,
+    Clock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/UI/Modal';
@@ -39,6 +40,14 @@ export default function Admin() {
     const { user, isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const mainRef = useRef(null);
+
+    const handleTabChange = (tabId) => {
+        setActiveTab(tabId);
+        if (mainRef.current) {
+            mainRef.current.scrollTop = 0;
+        }
+    };
 
     if (!isAdmin) {
         return <Navigate to="/" replace />;
@@ -70,7 +79,7 @@ export default function Admin() {
                         <button
                             key={tab.id}
                             className={`sidebar-link ${activeTab === tab.id ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => handleTabChange(tab.id)}
                         >
                             <tab.icon size={20} />
                             {tab.label}
@@ -85,7 +94,7 @@ export default function Admin() {
                 </div>
             </aside>
 
-            <main className="admin-main">
+            <main className="admin-main" ref={mainRef}>
                 {activeTab === 'dashboard' && <DashboardContent />}
                 {activeTab === 'courses' && <CoursesContent />}
                 {activeTab === 'products' && <ProductsContent />}
@@ -103,7 +112,7 @@ export default function Admin() {
                     <button
                         key={tab.id}
                         className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => handleTabChange(tab.id)}
                     >
                         <tab.icon size={20} />
                         <span>{tab.label}</span>
@@ -133,7 +142,7 @@ export default function Admin() {
                                     key={tab.id}
                                     className={`mobile-menu-item ${activeTab === tab.id ? 'active' : ''}`}
                                     onClick={() => {
-                                        setActiveTab(tab.id);
+                                        handleTabChange(tab.id);
                                         setShowMobileMenu(false);
                                     }}
                                 >
@@ -265,6 +274,18 @@ function CoursesContent() {
 
             {loading ? (
                 <div className="loading">Loading...</div>
+            ) : courses.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">
+                        <BookOpen size={32} />
+                    </div>
+                    <h3>No Courses Yet</h3>
+                    <p>Create your first course to get started</p>
+                    <button className="btn btn-primary" onClick={() => { setEditingCourse(null); setShowModal(true); }}>
+                        <Plus size={18} />
+                        Add Course
+                    </button>
+                </div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -280,15 +301,15 @@ function CoursesContent() {
                         <tbody>
                             {courses.map((course) => (
                                 <tr key={course.id}>
-                                    <td>{course.title}</td>
-                                    <td>{course.sessions || 0}</td>
-                                    <td>
+                                    <td data-label="Title">{course.title}</td>
+                                    <td data-label="Sessions">{course.sessions || 0}</td>
+                                    <td data-label="Prices">
                                         3M: ₹{course.prices?.m3 || 0} |
                                         6M: ₹{course.prices?.m6 || 0} |
                                         LT: ₹{course.prices?.lifetime || 0}
                                     </td>
-                                    <td>{course.featured ? 'Yes' : 'No'}</td>
-                                    <td>
+                                    <td data-label="Featured">{course.featured ? 'Yes' : 'No'}</td>
+                                    <td data-label="Actions">
                                         <div className="action-buttons">
                                             <button className="action-btn edit" onClick={() => openEdit(course)}>
                                                 <Edit2 size={16} />
@@ -327,7 +348,10 @@ function CourseForm({ course, onClose, onSave }) {
         description: course?.description || '',
         thumbnail_url: course?.thumbnail_url || '',
         video_links: course?.video_links?.join('\n') || '',
+        session_durations: course?.sessions_list?.map(s => s.duration.toString()).join('\n') || '',
+        session_titles: course?.session_titles?.join('\n') || course?.sessions_list?.map(s => s.title).join('\n') || '',
         featured: course?.featured || false,
+        is_first_session_free: course?.is_first_session_free || false,
         prices: {
             m3: course?.prices?.m3 || 0,
             m6: course?.prices?.m6 || 0,
@@ -335,15 +359,88 @@ function CourseForm({ course, onClose, onSave }) {
         },
     });
     const [saving, setSaving] = useState(false);
+    const [fetchingMetadata, setFetchingMetadata] = useState(false);
+
+    const fetchMetadata = async () => {
+        const videoLinks = formData.video_links.split('\n').filter(url => url.trim());
+        if (videoLinks.length === 0) {
+            alert('Please add video links first');
+            return;
+        }
+        setFetchingMetadata(true);
+        try {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_BASE_URL}/courses/extract-metadata`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(videoLinks),
+            });
+            const data = await res.json();
+            if (data.metadata) {
+                setFormData(prev => ({
+                    ...prev,
+                    session_titles: data.metadata.map(m => m.title).join('\n'),
+                    session_durations: data.metadata.map(m => m.duration.toString()).join('\n'),
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch metadata:', error);
+            alert('Failed to fetch metadata. Please try manually.');
+        } finally {
+            setFetchingMetadata(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
         try {
+            const videoLinks = formData.video_links.split('\n').filter((url) => url.trim());
+            let durations = formData.session_durations.split('\n').filter(d => d.trim()).map(d => parseFloat(d.trim()) || 0);
+            let titles = formData.session_titles.split('\n').filter(t => t.trim());
+            
+            if ((durations.length === 0 || titles.length === 0) && videoLinks.length > 0) {
+                const token = localStorage.getItem('course_better_token');
+                const res = await fetch(`${API_BASE_URL}/courses/extract-metadata`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : '',
+                    },
+                    body: JSON.stringify(videoLinks),
+                });
+                const data = await res.json();
+                if (data.metadata && data.metadata.length > 0) {
+                    durations = data.metadata.map(m => Math.round(m.duration * 10) / 10);
+                    titles = data.metadata.map(m => m.title);
+                    setFormData(prev => ({
+                        ...prev,
+                        session_durations: durations.map(d => d.toString()).join('\n'),
+                        session_titles: titles.join('\n'),
+                    }));
+                }
+            }
+            
+            if (durations.length === 0) {
+                durations = [0];
+            }
+            if (titles.length === 0) {
+                titles = videoLinks.map((_, i) => `Session ${i + 1}`);
+            }
+            
             const data = {
-                ...formData,
-                video_links: formData.video_links.split('\n').filter((url) => url.trim()),
+                title: formData.title,
+                description: formData.description,
+                thumbnail_url: formData.thumbnail_url,
+                video_links: videoLinks,
+                session_durations: durations,
+                session_titles: titles,
                 prices: formData.prices,
+                featured: formData.featured,
+                is_first_session_free: formData.is_first_session_free,
             };
             if (course) {
                 await courseService.update(course.id, data);
@@ -397,6 +494,37 @@ function CourseForm({ course, onClose, onSave }) {
                     onChange={(e) => setFormData({ ...formData, video_links: e.target.value })}
                 />
             </div>
+            <div className="form-group">
+                <div className="form-group-header">
+                    <label>Session Titles & Durations (auto-fetched from YouTube)</label>
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={fetchMetadata}
+                        disabled={fetchingMetadata}
+                    >
+                        <Clock size={14} />
+                        {fetchingMetadata ? 'Fetching...' : 'Auto-Fetch Metadata'}
+                    </button>
+                </div>
+                <textarea
+                    className="input"
+                    rows={3}
+                    placeholder="Session titles will appear here after fetching"
+                    value={formData.session_titles}
+                    onChange={(e) => setFormData({ ...formData, session_titles: e.target.value })}
+                />
+            </div>
+            <div className="form-group">
+                <label>Session Durations (in minutes)</label>
+                <textarea
+                    className="input"
+                    rows={3}
+                    placeholder="Durations will appear here after fetching"
+                    value={formData.session_durations}
+                    onChange={(e) => setFormData({ ...formData, session_durations: e.target.value })}
+                />
+            </div>
             <div className="form-row">
                 <div className="form-group">
                     <label>3 Months Price (₹)</label>
@@ -443,6 +571,16 @@ function CourseForm({ course, onClose, onSave }) {
                         onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
                     />
                     Featured Course
+                </label>
+            </div>
+            <div className="form-group checkbox">
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={formData.is_first_session_free}
+                        onChange={(e) => setFormData({ ...formData, is_first_session_free: e.target.checked })}
+                    />
+                    First Session Free
                 </label>
             </div>
             <div className="form-actions">
@@ -501,6 +639,18 @@ function ProductsContent() {
 
             {loading ? (
                 <div className="loading">Loading...</div>
+            ) : products.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">
+                        <Package size={32} />
+                    </div>
+                    <h3>No Products Yet</h3>
+                    <p>Add your first product to start selling</p>
+                    <button className="btn btn-primary" onClick={() => { setEditingProduct(null); setShowModal(true); }}>
+                        <Plus size={18} />
+                        Add Product
+                    </button>
+                </div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -516,11 +666,11 @@ function ProductsContent() {
                         <tbody>
                             {products.map((product) => (
                                 <tr key={product.id}>
-                                    <td>{product.title}</td>
-                                    <td>₹{product.price}</td>
-                                    <td>{product.key_features?.length || 0}</td>
-                                    <td>{product.featured ? 'Yes' : 'No'}</td>
-                                    <td>
+                                    <td data-label="Title">{product.title}</td>
+                                    <td data-label="Price">₹{product.price}</td>
+                                    <td data-label="Features">{product.key_features?.length || 0}</td>
+                                    <td data-label="Featured">{product.featured ? 'Yes' : 'No'}</td>
+                                    <td data-label="Actions">
                                         <div className="action-buttons">
                                             <button className="action-btn edit" onClick={() => { setEditingProduct(product); setShowModal(true); }}>
                                                 <Edit2 size={16} />
@@ -714,6 +864,18 @@ function CategoriesContent() {
 
             {loading ? (
                 <div className="loading">Loading...</div>
+            ) : categories.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">
+                        <FolderTree size={32} />
+                    </div>
+                    <h3>No Categories Yet</h3>
+                    <p>Create categories to organize your content</p>
+                    <button className="btn btn-primary" onClick={() => { setEditingCategory(null); setShowModal(true); }}>
+                        <Plus size={18} />
+                        Add Category
+                    </button>
+                </div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -728,10 +890,10 @@ function CategoriesContent() {
                         <tbody>
                             {categories.map((category) => (
                                 <tr key={category.id}>
-                                    <td>{category.name}</td>
-                                    <td>{category.slug}</td>
-                                    <td className="capitalize">{category.type}</td>
-                                    <td>
+                                    <td data-label="Name">{category.name}</td>
+                                    <td data-label="Slug">{category.slug}</td>
+                                    <td data-label="Type" className="capitalize">{category.type}</td>
+                                    <td data-label="Actions">
                                         <div className="action-buttons">
                                             <button className="action-btn edit" onClick={() => { setEditingCategory(category); setShowModal(true); }}>
                                                 <Edit2 size={16} />
@@ -866,6 +1028,14 @@ function OrdersContent() {
 
             {loading ? (
                 <div className="loading">Loading...</div>
+            ) : orders.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">
+                        <ShoppingBag size={32} />
+                    </div>
+                    <h3>No Orders Yet</h3>
+                    <p>Orders will appear here when customers make purchases</p>
+                </div>
             ) : (
                 <div className="data-table">
                     <table>
@@ -882,14 +1052,14 @@ function OrdersContent() {
                         <tbody>
                             {orders.map((order) => (
                                 <tr key={order.id}>
-                                    <td>{order.id.slice(-8)}</td>
-                                    <td>{order.items.length} item(s)</td>
-                                    <td>₹{order.total}</td>
-                                    <td className="capitalize">{order.payment_method}</td>
-                                    <td>
+                                    <td data-label="Order ID">{order.id.slice(-8)}</td>
+                                    <td data-label="Items">{order.items.length} item(s)</td>
+                                    <td data-label="Total">₹{order.total}</td>
+                                    <td data-label="Payment" className="capitalize">{order.payment_method}</td>
+                                    <td data-label="Status">
                                         <span className={`status-badge ${order.status}`}>{order.status}</span>
                                     </td>
-                                    <td>{new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td data-label="Date">{new Date(order.created_at).toLocaleDateString()}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -5,6 +5,7 @@ import Carousel from '../components/UI/Carousel';
 import CourseCard from '../components/UI/CourseCard';
 import ProductCard from '../components/UI/ProductCard';
 import { AnimatedSection, SectionTitle } from '../components/UI/Animations';
+import ArchitecturalLines from '../components/UI/ArchitecturalLines';
 import { courseService, productService } from '../services/api';
 import { API_BASE_URL } from '../config';
 import { useState, useEffect } from 'react';
@@ -109,10 +110,12 @@ export default function Home() {
                                     <div className="placeholder-spinner" />
                                 </div>
                             ) : founderImages[0]?.image_url || founder?.image_url ? (
-                                <img
-                                    src={founderImages[0]?.image_url || founder?.image_url}
-                                    alt={founder?.name || "Founder"}
-                                />
+                                <ArchitecturalLines seed={0.5}>
+                                    <img
+                                        src={founderImages[0]?.image_url || founder?.image_url}
+                                        alt={founder?.name || "Founder"}
+                                    />
+                                </ArchitecturalLines>
                             ) : (
                                 <div className="founder-placeholder">
                                     <User size={64} strokeWidth={1} />

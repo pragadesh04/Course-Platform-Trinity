@@ -16,6 +16,9 @@ from .course import (
     CourseResponse,
     CoursePrices,
     SessionInfo,
+    UserProgressCreate,
+    UserProgressUpdate,
+    UserProgressResponse,
 )
 from .product import (
     ProductCreate,
@@ -54,6 +57,9 @@ __all__ = [
     "CourseResponse",
     "CoursePrices",
     "SessionInfo",
+    "UserProgressCreate",
+    "UserProgressUpdate",
+    "UserProgressResponse",
     "ProductCreate",
     "ProductUpdate",
     "ProductResponse",

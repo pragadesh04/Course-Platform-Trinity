@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import datetime
-from bson import ObjectId
 from database import users_collection
 from schemas import UserCreate, UserLogin, UserResponse, Token, UserRole
 from auth import (

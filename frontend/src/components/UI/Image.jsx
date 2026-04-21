@@ -5,6 +5,7 @@ export default function Image({ src, alt, fallback, className, style, onLoad, ..
   const [loaded, setLoaded] = useState(false);
   
   const fallbackSrc = fallback || 'https://placehold.co/600x400/D4AF37/1A1A1A?text=No+Image';
+  const imageSrc = !src || src === '' ? fallbackSrc : src;
   
   const handleLoad = (e) => {
     setLoaded(true);
@@ -40,7 +41,7 @@ export default function Image({ src, alt, fallback, className, style, onLoad, ..
         </div>
       )}
       <img
-        src={error ? fallbackSrc : src}
+        src={error ? fallbackSrc : imageSrc}
         alt={alt}
         className={className}
         style={{

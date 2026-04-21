@@ -155,9 +155,33 @@
   font-weight: 600;
 }
 
+.free-preview-badge {
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .session-title {
   flex: 1;
   font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.session-item.expanded .session-title {
+  -webkit-line-clamp: unset;
+}
+
+.session-duration {
+  color: var(--color-gray-500);
+  font-size: 0.875rem;
 }
 
 .session-content {

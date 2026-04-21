@@ -50,7 +50,14 @@ export default function CourseCard({ course }) {
           </span>
           <span className="meta-item">
             <Clock size={14} />
-            {course.duration || 0} mins
+            {(() => {
+              const mins = course.duration || 0;
+              const hrs = Math.floor(mins / 60);
+              const m = Math.round(mins % 60);
+              if (hrs === 0) return `${m} min`;
+              if (m === 0) return `${hrs} hr`;
+              return `${hrs} hr ${m} min`;
+            })()}
           </span>
         </div>
 

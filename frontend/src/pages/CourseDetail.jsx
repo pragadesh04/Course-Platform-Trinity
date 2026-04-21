@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+
+function formatDuration(minutes) {
+  if (!minutes || minutes <= 0) return '0 min';
+  const hrs = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hrs === 0) return `${mins} min`;
+  if (mins === 0) return `${hrs} hr`;
+  return `${hrs} hr ${mins} min`;
+}
 import { courseService, orderService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Image from '../components/UI/Image';
@@ -75,6 +84,10 @@ export default function CourseDetail() {
     setShowPaymentModal(true);
   };
 
+  const handleWatchFree = (sessionIndex) => {
+    navigate(`/course/${id}/play/${sessionIndex}`);
+  };
+
   const handlePaymentSuccess = () => {
     fetchEnrolledCourses();
   };
@@ -125,7 +138,7 @@ export default function CourseDetail() {
               
               <div className="course-meta">
                 <span><Play size={16} /> {course.sessions || 0} Sessions</span>
-                <span><Clock size={16} /> {course.duration || 0} mins</span>
+                <span><Clock size={16} /> {formatDuration(course.duration)} total</span>
                 {isEnrolled && (
                   <span className="enrolled-badge">
                     <CheckCircle size={16} /> Enrolled
@@ -151,14 +164,18 @@ export default function CourseDetail() {
             <section className="course-section">
               <h2><BookOpen size={20} /> Course Sessions</h2>
               <div className="sessions-list">
-                {course.sessions_list?.map((session, index) => (
-                  <div key={index} className="session-item">
+                {course.sessions_list?.map((session, index) => {
+                  const canAccess = isEnrolled || session.is_free;
+                  return (
+                  <div key={index} className={`session-item ${expandedSessions[index] ? 'expanded' : ''}`}>
                     <button 
                       className="session-header"
                       onClick={() => toggleSession(index)}
                     >
                       <span className="session-number">Session {index + 1}</span>
+                      {session.is_free && <span className="free-preview-badge">Free Preview</span>}
                       <span className="session-title">{session.title}</span>
+                      <span className="session-duration">{formatDuration(session.duration)}</span>
                       {expandedSessions[index] ? (
                         <ChevronUp size={20} />
                       ) : (
@@ -168,12 +185,26 @@ export default function CourseDetail() {
                     {expandedSessions[index] && (
                       <div className="session-content">
                         <p>{session.description}</p>
-                        {isEnrolled ? (
-                          <div className="session-video">
-                            <video controls src={session.video_url}>
-                              Your browser does not support video.
-                            </video>
-                          </div>
+                        {canAccess ? (
+                          session.video_url ? (
+                            <div className="session-video">
+                              <video controls src={session.video_url}>
+                                Your browser does not support video.
+                              </video>
+                              {!isEnrolled && session.is_free && (
+                                <button 
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => handleWatchFree(index)}
+                                >
+                                  <Play size={16} /> Watch Full Video
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="session-locked">
+                              <p>Video not available</p>
+                            </div>
+                          )
                         ) : (
                           <div className="session-locked">
                             <p>Enroll to access this video</p>
@@ -189,7 +220,8 @@ export default function CourseDetail() {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
@@ -274,7 +306,7 @@ export default function CourseDetail() {
               <h4>This course includes:</h4>
               <ul>
                 <li><Play size={16} /> {course.sessions || 0} video sessions</li>
-                <li><Clock size={16} /> {course.duration || 0} minutes of content</li>
+                <li><Clock size={16} /> {formatDuration(course.duration)} total</li>
                 <li><Users size={16} /> Access on mobile and desktop</li>
                 <li><BookOpen size={16} /> Downloadable resources</li>
               </ul>

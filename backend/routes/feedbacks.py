@@ -9,7 +9,7 @@ from database import (
     courses_collection,
     orders_collection,
 )
-from schemas import UserResponse, UserRole
+from schemas import UserResponse
 from auth import get_current_user, get_admin_user
 
 router = APIRouter(prefix="/feedbacks", tags=["Feedbacks"])
