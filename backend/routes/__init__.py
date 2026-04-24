@@ -12,6 +12,7 @@ from .comments import router as comments_router
 from .feedbacks import router as feedbacks_router
 from .coupons import router as coupons_router
 from .payments import router as payments_router
+from .enrollments import router as enrollments_router
 
 routers = [
     auth_router,
@@ -28,4 +29,5 @@ routers = [
     feedbacks_router,
     coupons_router,
     payments_router,
+    enrollments_router,
 ]

@@ -8,6 +8,7 @@ from auth import (
     create_access_token,
     get_current_user,
 )
+from routes.enrollments import claim_enrollments_for_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -33,17 +34,20 @@ async def register(user_data: UserCreate):
 
     result = await users_collection.insert_one(user_doc)
     user_doc["_id"] = result.inserted_id
+    user_id = str(result.inserted_id)
 
     user_response = UserResponse(
-        id=str(result.inserted_id),
+        id=user_id,
         name=user_doc["name"],
         mobile_number=user_doc["mobile_number"],
         role=UserRole(user_doc["role"]),
         created_at=user_doc["created_at"],
     )
 
-    access_token = create_access_token(
-        data={"sub": str(result.inserted_id), "role": user_doc["role"]}
+    access_token = create_access_token(data={"sub": user_id, "role": user_doc["role"]})
+
+    claimed_enrollments = await claim_enrollments_for_user(
+        user_id, user_data.mobile_number
     )
 
     return Token(access_token=access_token, user=user_response)

@@ -42,6 +42,14 @@ from .gallery import (
     GalleryImageCreate,
     GalleryImageResponse,
 )
+from .enrollment import (
+    EnrollmentCreate,
+    EnrollmentUpdate,
+    EnrollmentResponse,
+    EnrollmentWithUser,
+    EnrollmentDuration,
+    EnrollmentStatus,
+)
 
 __all__ = [
     "UserCreate",
@@ -72,4 +80,10 @@ __all__ = [
     "TestimonialResponse",
     "GalleryImageCreate",
     "GalleryImageResponse",
+    "EnrollmentCreate",
+    "EnrollmentUpdate",
+    "EnrollmentResponse",
+    "EnrollmentWithUser",
+    "EnrollmentDuration",
+    "EnrollmentStatus",
 ]
