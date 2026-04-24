@@ -49,31 +49,37 @@ export default function Login() {
           {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label>Mobile Number</label>
+            <label htmlFor="login-mobile">Mobile Number</label>
             <div className="input-icon">
               <Phone size={18} />
               <input
+                id="login-mobile"
+                name="mobile"
                 type="tel"
                 className="input"
                 placeholder="Enter mobile number"
                 value={mobile_number}
                 onChange={(e) => setMobile(e.target.value)}
                 required
+                autoComplete="tel"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
             <div className="input-icon">
               <Lock size={18} />
               <input
+                id="login-password"
+                name="password"
                 type="password"
                 className="input"
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
           </div>

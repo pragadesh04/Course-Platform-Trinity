@@ -222,6 +222,7 @@ async def save_course_progress(
         "course_id": course_id,
         "session_idx": progress_data.session_idx,
         "timestamp": progress_data.timestamp,
+        "completed": progress_data.completed,
         "updated_at": datetime.utcnow(),
     }
 
@@ -239,11 +240,13 @@ async def save_course_progress(
             {
                 "$set": {
                     "timestamp": progress_data.timestamp,
+                    "completed": progress_data.completed,
                     "updated_at": datetime.utcnow(),
                 }
             },
         )
         progress_doc["_id"] = existing["_id"]
+        progress_doc["completed"] = progress_data.completed
     else:
         result = await user_progress_collection.insert_one(progress_doc)
         progress_doc["_id"] = result.inserted_id

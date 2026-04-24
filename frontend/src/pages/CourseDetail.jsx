@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart, Zap } from 'lucide-react';
 
 function formatDuration(minutes) {
   if (!minutes || minutes <= 0) return '0 min';
@@ -29,11 +29,20 @@ export default function CourseDetail() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [ordering, setOrdering] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [courseProgress, setCourseProgress] = useState([]);
 
   useEffect(() => {
     fetchCourse();
     if (user) fetchEnrolledCourses();
   }, [id, user]);
+
+  const isEnrolled = enrolledCourses.includes(id);
+
+  useEffect(() => {
+    if (isEnrolled && user) {
+      fetchCourseProgress();
+    }
+  }, [isEnrolled, user]);
 
   const fetchCourse = async () => {
     try {
@@ -63,7 +72,27 @@ export default function CourseDetail() {
     }
   };
 
-  const isEnrolled = enrolledCourses.includes(id);
+  const fetchCourseProgress = async () => {
+    if (!user) return;
+    try {
+      const progress = await courseService.getProgress(id);
+      setCourseProgress(progress || []);
+    } catch (error) {
+      console.error('Failed to fetch course progress:', error);
+    }
+  };
+
+  const getOverallProgress = () => {
+    if (!courseProgress.length || !course?.sessions_list?.length) return 0;
+    const completedSessions = courseProgress.filter(p => p.completed).length;
+    return Math.round((completedSessions / course.sessions_list.length) * 100);
+  };
+
+  const getLastWatchedIndex = () => {
+    if (!courseProgress.length) return 0;
+    const sorted = [...courseProgress].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    return sorted[0]?.session_idx ?? 0;
+  };
 
   const toggleSession = (index) => {
     setExpandedSessions((prev) => ({
@@ -140,9 +169,11 @@ export default function CourseDetail() {
                 <span><Play size={16} /> {course.sessions || 0} Sessions</span>
                 <span><Clock size={16} /> {formatDuration(course.duration)} total</span>
                 {isEnrolled && (
-                  <span className="enrolled-badge">
-                    <CheckCircle size={16} /> Enrolled
-                  </span>
+                  <>
+                    <span className="progress-badge">
+                      {getOverallProgress()}% Complete
+                    </span>
+                  </>
                 )}
               </div>
             </div>
@@ -166,14 +197,17 @@ export default function CourseDetail() {
               <div className="sessions-list">
                 {course.sessions_list?.map((session, index) => {
                   const canAccess = isEnrolled || session.is_free;
+                  const progressEntry = courseProgress.find(p => p.session_idx === index);
+                  const isCompleted = progressEntry?.completed;
                   return (
-                  <div key={index} className={`session-item ${expandedSessions[index] ? 'expanded' : ''}`}>
+                  <div key={index} className={`session-item ${expandedSessions[index] ? 'expanded' : ''} ${isCompleted ? 'completed' : ''}`}>
                     <button 
                       className="session-header"
                       onClick={() => toggleSession(index)}
                     >
                       <span className="session-number">Session {index + 1}</span>
                       {session.is_free && <span className="free-preview-badge">Free Preview</span>}
+                      {isEnrolled && isCompleted && <span className="completed-badge"><CheckCircle size={12} /></span>}
                       <span className="session-title">{session.title}</span>
                       <span className="session-duration">{formatDuration(session.duration)}</span>
                       {expandedSessions[index] ? (
@@ -185,26 +219,20 @@ export default function CourseDetail() {
                     {expandedSessions[index] && (
                       <div className="session-content">
                         <p>{session.description}</p>
-                        {canAccess ? (
-                          session.video_url ? (
-                            <div className="session-video">
-                              <video controls src={session.video_url}>
-                                Your browser does not support video.
-                              </video>
-                              {!isEnrolled && session.is_free && (
-                                <button 
-                                  className="btn btn-primary btn-sm"
-                                  onClick={() => handleWatchFree(index)}
-                                >
-                                  <Play size={16} /> Watch Full Video
-                                </button>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="session-locked">
-                              <p>Video not available</p>
-                            </div>
-                          )
+                        {session.is_free ? (
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleWatchFree(index)}
+                          >
+                            <Play size={16} /> Watch Preview
+                          </button>
+                        ) : canAccess ? (
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleWatchFree(index)}
+                          >
+                            <Play size={16} /> Watch Video
+                          </button>
                         ) : (
                           <div className="session-locked">
                             <p>Enroll to access this video</p>
@@ -239,6 +267,13 @@ export default function CourseDetail() {
                 <div className="enrolled-info">
                   <CheckCircle size={48} />
                   <p>You have access to all course content</p>
+                  <button
+                    onClick={() => navigate(`/course/${id}/play/${getLastWatchedIndex()}`)}
+                    className="btn btn-primary btn-lg start-learning-btn"
+                  >
+                    <Zap size={18} />
+                    {getLastWatchedIndex() > 0 ? 'Resume Learning' : 'Start Learning'}
+                  </button>
                 </div>
               ) : (
                 <>

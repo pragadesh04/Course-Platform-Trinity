@@ -32,7 +32,12 @@ export default function ImageUploader({ value = '', onChange, label = "Upload Im
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('course_better_token');
+      let token = null;
+      try {
+        token = localStorage.getItem('course_better_token');
+      } catch (e) {
+        console.warn('localStorage not available');
+      }
       const response = await fetch(`${API_BASE_URL}/upload/image`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},

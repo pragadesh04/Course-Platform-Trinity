@@ -62,61 +62,73 @@ export default function Register() {
           {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label>Full Name</label>
+            <label htmlFor="register-name">Full Name</label>
             <div className="input-icon">
               <User size={18} />
               <input
+                id="register-name"
+                name="name"
                 type="text"
                 className="input"
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoComplete="name"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Mobile Number</label>
+            <label htmlFor="register-mobile">Mobile Number</label>
             <div className="input-icon">
               <Phone size={18} />
               <input
+                id="register-mobile"
+                name="mobile"
                 type="tel"
                 className="input"
                 placeholder="Enter mobile number"
                 value={mobile_number}
                 onChange={(e) => setMobile(e.target.value)}
                 required
+                autoComplete="tel"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="register-password">Password</label>
             <div className="input-icon">
               <Lock size={18} />
               <input
+                id="register-password"
+                name="new-password"
                 type="password"
                 className="input"
                 placeholder="Create password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Confirm Password</label>
+            <label htmlFor="register-confirm">Confirm Password</label>
             <div className="input-icon">
               <Lock size={18} />
               <input
+                id="register-confirm"
+                name="confirm-password"
                 type="password"
                 className="input"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                autoComplete="new-password"
               />
             </div>
           </div>

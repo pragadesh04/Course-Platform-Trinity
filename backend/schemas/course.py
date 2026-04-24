@@ -63,6 +63,7 @@ class UserProgressBase(BaseModel):
     course_id: str
     session_idx: int
     timestamp: float = 0
+    completed: bool = False
 
 
 class UserProgressCreate(UserProgressBase):
