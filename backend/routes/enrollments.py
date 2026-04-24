@@ -2,13 +2,18 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
-from database import enrollments_collection, users_collection, courses_collection
+from database import enrollments_collection, users_collection, courses_collection, orders_collection
 from schemas import (
     EnrollmentCreate,
     EnrollmentUpdate,
     EnrollmentResponse,
     EnrollmentWithUser,
     UserResponse,
+    BulkEnrollmentCreate,
+    BulkEnrollmentResponse,
+    OrderStatus,
+    PaymentMethod,
+    OrderItem,
 )
 from services.enrollment import calculate_expiry
 from auth import get_admin_user
@@ -81,6 +86,80 @@ async def create_enrollment(
         status=enrollment_doc["status"],
         expires_at=enrollment_doc["expires_at"],
         created_at=enrollment_doc["created_at"],
+    )
+
+
+@router.post("/bulk", response_model=BulkEnrollmentResponse)
+async def create_bulk_enrollments(
+    enrollment_data: BulkEnrollmentCreate,
+    admin: UserResponse = Depends(get_admin_user),
+):
+    user = await users_collection.find_one(
+        {"mobile_number": enrollment_data.mobile_number}
+    )
+
+    user_id = str(user["_id"]) if user else None
+
+    expires_at = calculate_expiry(enrollment_data.duration)
+
+    status_value = "active" if user_id else "pending"
+
+    order_items = []
+    total_value = 0.0
+
+    for course_id in enrollment_data.course_ids:
+        try:
+            course = await courses_collection.find_one({"_id": ObjectId(course_id)})
+            if course:
+                price_map = {"3m": "m3", "6m": "m6", "lifetime": "lifetime"}
+                price_key = price_map.get(enrollment_data.duration.value, "m3")
+                price = course.get("prices", {}).get(price_key, 0)
+                order_items.append({
+                    "item_id": course_id,
+                    "item_type": "course",
+                    "title": course.get("title", ""),
+                    "price": price,
+                    "plan": enrollment_data.duration.value,
+                })
+                total_value += price
+        except:
+            pass
+
+    enrollment_docs = [
+        {
+            "mobile_number": enrollment_data.mobile_number,
+            "user_id": user_id,
+            "course_id": course_id,
+            "duration": enrollment_data.duration.value,
+            "status": status_value,
+            "expires_at": expires_at,
+            "created_at": datetime.utcnow(),
+        }
+        for course_id in enrollment_data.course_ids
+    ]
+
+    if enrollment_docs:
+        await enrollments_collection.insert_many(enrollment_docs)
+
+    if order_items:
+        order_doc = {
+            "user_id": user_id or "",
+            "mobile_number": enrollment_data.mobile_number,
+            "items": order_items,
+            "total": total_value,
+            "status": OrderStatus.COMPLETED.value,
+            "payment_method": PaymentMethod.ADMIN_GRANTED.value,
+            "created_at": datetime.utcnow(),
+            "paid_at": datetime.utcnow(),
+        }
+        await orders_collection.insert_one(order_doc)
+
+    return BulkEnrollmentResponse(
+        success=True,
+        enrolled_count=len(enrollment_docs),
+        mobile_number=enrollment_data.mobile_number,
+        course_ids=enrollment_data.course_ids,
+        status=status_value,
     )
 
 

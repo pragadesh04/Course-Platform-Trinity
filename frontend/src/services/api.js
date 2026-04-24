@@ -119,3 +119,11 @@ export const orderService = {
   create: (data) => api.post('/orders', data),
   updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
 };
+
+export const enrollmentService = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return api.get(`/admin/enrollments${query ? `?${query}` : ''}`);
+  },
+  bulkCreate: (data) => api.post('/admin/enrollments/bulk', data),
+};

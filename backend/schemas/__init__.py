@@ -49,6 +49,8 @@ from .enrollment import (
     EnrollmentWithUser,
     EnrollmentDuration,
     EnrollmentStatus,
+    BulkEnrollmentCreate,
+    BulkEnrollmentResponse,
 )
 
 __all__ = [
@@ -86,4 +88,6 @@ __all__ = [
     "EnrollmentWithUser",
     "EnrollmentDuration",
     "EnrollmentStatus",
+    "BulkEnrollmentCreate",
+    "BulkEnrollmentResponse",
 ]

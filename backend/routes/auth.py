@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import datetime
-from database import users_collection
+from database import users_collection, orders_collection
 from schemas import UserCreate, UserLogin, UserResponse, Token, UserRole
 from auth import (
     get_password_hash,
@@ -50,6 +50,11 @@ async def register(user_data: UserCreate):
         user_id, user_data.mobile_number
     )
 
+    await orders_collection.update_many(
+        {"mobile_number": user_data.mobile_number, "user_id": ""},
+        {"$set": {"user_id": user_id}}
+    )
+
     return Token(access_token=access_token, user=user_response)
 
 
@@ -72,6 +77,12 @@ async def login(credentials: UserLogin):
 
     access_token = create_access_token(
         data={"sub": str(user["_id"]), "role": user["role"]}
+    )
+
+    user_id = str(user["_id"])
+    await orders_collection.update_many(
+        {"mobile_number": user["mobile_number"], "user_id": ""},
+        {"$set": {"user_id": user_id}}
     )
 
     return Token(access_token=access_token, user=user_response)

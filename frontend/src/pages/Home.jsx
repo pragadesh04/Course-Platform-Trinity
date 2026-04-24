@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Scissors, Package, User } from 'lucide-react';
-import Carousel from '../components/UI/Carousel';
 import CourseCard from '../components/UI/CourseCard';
 import ProductCard from '../components/UI/ProductCard';
 import { AnimatedSection, SectionTitle } from '../components/UI/Animations';
@@ -35,7 +34,12 @@ export default function Home() {
 
                 setFeaturedCourses(courses.slice(0, 4));
                 setFeaturedProducts(products.slice(0, 4));
-                setTestimonials(testimonialsData);
+                
+                const sortedTestimonials = testimonialsData
+                    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+                    .slice(0, 10);
+                setTestimonials(sortedTestimonials);
+                
                 const galleryItems = Array.isArray(galleryData) ? galleryData : [];
                 setGallery(galleryItems.filter(item => item.type !== 'founder'));
                 setFounderImages(galleryItems.filter(item => item.type === 'founder'));
@@ -233,10 +237,10 @@ export default function Home() {
                         title="What Our Students Say"
                         subtitle="Join thousands of satisfied learners"
                     />
-                    {testimonials.length > 0 ? (
-                        <Carousel>
-                            {testimonials.map((testimonial, index) => (
-                                <div key={testimonial.id || index} className="testimonial-slide">
+                    <div className="testimonials-list">
+                        {testimonials.length > 0 ? (
+                            testimonials.map((testimonial, index) => (
+                                <div key={testimonial.id || index} className="testimonial-item">
                                     <div className="testimonial-card">
                                         <img
                                             src={testimonial.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=D4AF37&color=1A1A1A`}
@@ -255,13 +259,13 @@ export default function Home() {
                                         <span className="testimonial-role">{testimonial.role}</span>
                                     </div>
                                 </div>
-                            ))}
-                        </Carousel>
-                    ) : (
-                        <div className="empty-state">
-                            <p>Testimonials coming soon!</p>
-                        </div>
-                    )}
+                            ))
+                        ) : (
+                            <div className="empty-state">
+                                <p>No testimonials yet</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </section>
 

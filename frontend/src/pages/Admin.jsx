@@ -23,10 +23,13 @@ import {
     MoreHorizontal,
     Home,
     Clock,
+    UserPlus,
+    Key,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/UI/Modal';
 import ImageUploader from '../components/UI/ImageUploader';
+import BulkAccessModal from '../components/Admin/BulkAccessModal';
 import {
     courseService,
     productService,
@@ -40,6 +43,7 @@ export default function Admin() {
     const { user, isAdmin } = useAuth();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [isBulkAccessModalOpen, setIsBulkAccessModalOpen] = useState(false);
     const mainRef = useRef(null);
 
     const handleTabChange = (tabId) => {
@@ -107,6 +111,20 @@ export default function Admin() {
                 {activeTab === 'settings' && <SettingsContent />}
             </main>
 
+            <motion.button
+                className="fab-button"
+                onClick={() => setIsBulkAccessModalOpen(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                title="Grant Bulk Access"
+            >
+                <UserPlus size={24} />
+                <span>Grant Access</span>
+            </motion.button>
+
             <nav className="mobile-bottom-nav">
                 {mobileTabs.map((tab) => (
                     <button
@@ -159,6 +177,11 @@ export default function Admin() {
                     </div>
                 </div>
             )}
+
+            <BulkAccessModal
+                isOpen={isBulkAccessModalOpen}
+                onClose={() => setIsBulkAccessModalOpen(false)}
+            />
         </div>
     );
 }

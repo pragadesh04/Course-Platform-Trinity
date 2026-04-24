@@ -27,3 +27,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+print(settings.MONGODB_URL)

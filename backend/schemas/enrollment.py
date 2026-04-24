@@ -57,3 +57,17 @@ class EnrollmentWithUser(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class BulkEnrollmentCreate(BaseModel):
+    mobile_number: str
+    course_ids: List[str]
+    duration: EnrollmentDuration = EnrollmentDuration.M3
+
+
+class BulkEnrollmentResponse(BaseModel):
+    success: bool
+    enrolled_count: int
+    mobile_number: str
+    course_ids: List[str]
+    status: str
