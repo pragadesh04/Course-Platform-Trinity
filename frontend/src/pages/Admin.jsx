@@ -25,6 +25,10 @@ import {
     Clock,
     UserPlus,
     Key,
+    Bell,
+    Search,
+    LogOut,
+    ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/UI/Modal';
@@ -74,9 +78,32 @@ export default function Admin() {
 
     return (
         <div className="admin-page">
+            <header className="admin-header">
+                <div className="admin-header-left">
+                    <h2>Admin Panel</h2>
+                </div>
+                <div className="admin-header-right">
+                    <button className="header-btn">
+                        <Search size={20} />
+                    </button>
+                    <button className="header-btn">
+                        <Bell size={20} />
+                        <span className="notification-badge">3</span>
+                    </button>
+                    <div className="admin-user">
+                        <div className="user-avatar">
+                            {user?.name?.charAt(0) || 'A'}
+                        </div>
+                        <span className="user-name">{user?.name || 'Admin'}</span>
+                        <ChevronDown size={16} />
+                    </div>
+                </div>
+            </header>
+
             <aside className="admin-sidebar">
-                <div className="sidebar-header">
-                    <h3>Admin Panel</h3>
+                <div className="sidebar-logo">
+                    <span className="logo-text">Trinity</span>
+                    <span className="logo-sub">Admin</span>
                 </div>
                 <nav className="sidebar-nav">
                     {tabs.map((tab) => (
@@ -95,6 +122,10 @@ export default function Admin() {
                         <Eye size={20} />
                         View Site
                     </Link>
+                    <button className="sidebar-link" onClick={() => {}}>
+                        <LogOut size={20} />
+                        Logout
+                    </button>
                 </div>
             </aside>
 
@@ -109,6 +140,10 @@ export default function Admin() {
                 {activeTab === 'comments' && <CommentsContent />}
                 {activeTab === 'feedbacks' && <FeedbacksContent />}
                 {activeTab === 'settings' && <SettingsContent />}
+                
+                <footer className="admin-footer">
+                    <p>&copy; 2026 Trinity. All rights reserved.</p>
+                </footer>
             </main>
 
             <motion.button
@@ -1491,8 +1526,9 @@ function SettingsContent() {
     const [founder, setFounder] = useState({ name: '', title: '', bio: '', image_url: '' });
     const [about, setAbout] = useState({ experience_years: 10, mission: '', about_text: '' });
     const [contact, setContact] = useState({ phone: '', email: '', address: '', whatsapp: '', instagram: '', facebook: '' });
-    const [saving, setSaving] = useState({ founder: false, about: false, contact: false });
-    const [messages, setMessages] = useState({ founder: '', about: '', contact: '' });
+    const [hero, setHero] = useState({ title: '', subtitle: '', image_url: '' });
+    const [saving, setSaving] = useState({ founder: false, about: false, contact: false, hero: false });
+    const [messages, setMessages] = useState({ founder: '', about: '', contact: '', hero: '' });
     const [loading, setLoading] = useState(true);
     const API_URL = API_BASE_URL || 'http://localhost:8000';
 
@@ -1502,19 +1538,22 @@ function SettingsContent() {
 
     async function fetchAllSettings() {
         try {
-            const [founderRes, aboutRes, contactRes] = await Promise.all([
+            const [founderRes, aboutRes, contactRes, heroRes] = await Promise.all([
                 fetch(`${API_URL}/settings/founder`),
                 fetch(`${API_URL}/settings/about`),
-                fetch(`${API_URL}/settings/contact`)
+                fetch(`${API_URL}/settings/contact`),
+                fetch(`${API_URL}/settings/hero`)
             ]);
-            const [founderData, aboutData, contactData] = await Promise.all([
+            const [founderData, aboutData, contactData, heroData] = await Promise.all([
                 founderRes.json(),
                 aboutRes.json(),
-                contactRes.json()
+                contactRes.json(),
+                heroRes.json()
             ]);
             setFounder(founderData);
             setAbout(aboutData);
             setContact(contactData);
+            setHero(heroData);
         } catch (error) {
             console.error('Failed to fetch settings:', error);
         } finally {
@@ -1543,6 +1582,30 @@ function SettingsContent() {
             setMessages(prev => ({ ...prev, founder: 'error' }));
         } finally {
             setSaving(prev => ({ ...prev, founder: false }));
+        }
+    }
+
+    async function saveHero(e) {
+        e.preventDefault();
+        setSaving(prev => ({ ...prev, hero: true }));
+        setMessages(prev => ({ ...prev, hero: '' }));
+        try {
+            const token = localStorage.getItem('course_better_token');
+            const res = await fetch(`${API_URL}/settings/hero`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(hero),
+            });
+            if (!res.ok) throw new Error('Failed to save');
+            setMessages(prev => ({ ...prev, hero: 'success' }));
+        } catch (error) {
+            console.error('Failed to save hero:', error);
+            setMessages(prev => ({ ...prev, hero: 'error' }));
+        } finally {
+            setSaving(prev => ({ ...prev, hero: false }));
         }
     }
 
@@ -1602,6 +1665,32 @@ function SettingsContent() {
         <div className="admin-content">
             <h1>Site Settings</h1>
             
+            <form onSubmit={saveHero} className="admin-form settings-section">
+                <div className="settings-header">
+                    <h3>Hero Section</h3>
+                    {messages.hero === 'success' && <span className="success-msg">Saved!</span>}
+                    {messages.hero === 'error' && <span className="error-msg">Failed to save</span>}
+                </div>
+                <div className="form-group">
+                    <label>Hero Title</label>
+                    <input type="text" className="input" value={hero.title} onChange={(e) => setHero({ ...hero, title: e.target.value })} />
+                </div>
+                <div className="form-group">
+                    <label>Hero Subtitle</label>
+                    <textarea className="input" rows={3} value={hero.subtitle} onChange={(e) => setHero({ ...hero, subtitle: e.target.value })} />
+                </div>
+                <div className="form-group">
+                    <label>Hero Image</label>
+                    <ImageUploader
+                        value={hero.image_url || ''}
+                        onChange={(url) => setHero(prev => ({ ...prev, image_url: url }))}
+                    />
+                </div>
+                <button type="submit" className="btn btn-primary" disabled={saving.hero}>
+                    {saving.hero ? 'Saving...' : 'Save Hero Settings'}
+                </button>
+            </form>
+
             <form onSubmit={saveAbout} className="admin-form settings-section">
                 <div className="settings-header">
                     <h3>About Us Settings</h3>

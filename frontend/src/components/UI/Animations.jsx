@@ -2,6 +2,24 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 
+export const springTransition = {
+  type: 'spring',
+  stiffness: 100,
+  damping: 20,
+};
+
+export const elasticTransition = {
+  type: 'spring',
+  stiffness: 100,
+  damping: 15,
+  mass: 0.5,
+};
+
+export const smoothTransition = {
+  duration: 0.6,
+  ease: [0.43, 0.13, 0.23, 0.96],
+};
+
 export function SectionTitle({ title, subtitle, centered = true }) {
   return (
     <div className={`section-title ${centered ? 'centered' : ''}`}>
@@ -19,9 +37,9 @@ export function AnimatedSection({ children, className = '', delay = 0 }) {
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.6, delay }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ ...elasticTransition, delay }}
     >
       {children}
     </motion.div>
@@ -40,7 +58,7 @@ export function FadeIn({ children, direction = 'up', delay = 0 }) {
     <motion.div
       initial={variants[direction]}
       animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.5, delay }}
+      transition={{ ...elasticTransition, delay }}
     >
       {children}
     </motion.div>
@@ -74,7 +92,7 @@ export function StaggerItem({ children }) {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 },
       }}
-      transition={{ duration: 0.4 }}
+      transition={elasticTransition}
     >
       {children}
     </motion.div>

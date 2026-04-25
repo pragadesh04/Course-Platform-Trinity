@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, ShoppingBag, BookOpen, LogOut, LayoutDashboard, ShoppingCart } from 'lucide-react';
+import { Menu, X, User, ShoppingBag, BookOpen, LogOut, LayoutDashboard, ShoppingCart, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationPanel from '../UI/NotificationPanel';
 import './Navbar.css';
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
 
@@ -20,6 +23,27 @@ export default function Navbar() {
     window.addEventListener('cartUpdated', updateCartCount);
     return () => window.removeEventListener('cartUpdated', updateCartCount);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('course_better_token');
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/notifications/unread-count`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      setUnreadCount(data.count || 0);
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  };
 
   useEffect(() => {
     setMobileOpen(false);
@@ -41,18 +65,40 @@ export default function Navbar() {
         </Link>
 
         <div className="navbar-links">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
-            >
-              {link.label}
-            </Link>
-          ))}
+<AnimatePresence>
+            {navLinks.map((link, index) => {
+              const isActive = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-link ${isActive ? 'active' : ''}`}
+                >
+                  {isActive && (
+                    <motion.div
+                      className="nav-indicator"
+                      layoutId="nav-indicator"
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  {link.label}
+                </Link>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
         <div className="navbar-actions">
+          {user && (
+            <button 
+              className="nav-icon-btn notification-btn" 
+              title="Notifications"
+              onClick={() => setShowNotifications(prev => !prev)}
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </button>
+          )}
           <Link to="/cart" className="nav-icon-btn cart-btn" title="Cart">
             <ShoppingCart size={20} />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
@@ -87,6 +133,16 @@ export default function Navbar() {
           )}
         </div>
 
+        {user && (
+          <button 
+            className="mobile-notification-btn"
+            onClick={() => setShowNotifications(prev => !prev)}
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && <span className="mobile-notification-badge">{unreadCount}</span>}
+          </button>
+        )}
+
         <button
           className="mobile-menu-btn"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -95,7 +151,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {mobileOpen && (
           <motion.div
             className="mobile-menu"
@@ -134,6 +190,11 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <NotificationPanel 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
     </nav>
   );
 }

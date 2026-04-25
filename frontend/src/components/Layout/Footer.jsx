@@ -29,8 +29,8 @@ export default function Footer() {
         <div className="footer-main">
           <div className="footer-brand">
             <Link to="/" className="footer-logo">
-              <span className="logo-text">Course</span>
-              <span className="logo-accent">Better</span>
+              <span className="logo-text">Trinity</span>
+              <span className="logo-accent">Tailoring</span>
             </Link>
             <p className="footer-tagline">
               Master the art of tailoring with our premium courses and quality products.

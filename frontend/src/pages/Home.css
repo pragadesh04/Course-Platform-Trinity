@@ -463,3 +463,157 @@
     font-size: 15px;
   }
 }
+
+.founder-portrait-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4 / 5;
+}
+
+.founder-concentric-circle {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.founder-squiggle {
+  position: absolute;
+  color: var(--color-gold);
+  opacity: 0.6;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.founder-squiggle.wiggle {
+  animation: wiggle 0.5s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.founder-squiggle.squiggle-left {
+  width: 60%;
+  height: 60%;
+  top: -5%;
+  left: -20%;
+  z-index: 1;
+}
+
+.founder-squiggle.squiggle-bottom {
+  width: 50%;
+  height: 50%;
+  bottom: -5%;
+  left: -10%;
+  z-index: 1;
+}
+
+.founder-arch {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  aspect-ratio: 3 / 4;
+  background: #f6c032;
+  border-radius: 250px 250px 0 0;
+  overflow: hidden;
+}
+
+.founder-sunburst {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 100%,
+    rgba(255, 255, 200, 0.3) 0deg 10deg,
+    transparent 10deg 20deg
+  );
+  transition: opacity 0.3s ease;
+}
+
+.founder-sunburst.active {
+  opacity: 0.8;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.founder-sparkles {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sparkle {
+  color: var(--color-gold);
+}
+
+.sparkle-1 {
+  opacity: 1;
+}
+
+.sparkle-2 {
+  opacity: 0.6;
+}
+
+.sparkle-3 {
+  opacity: 0.4;
+}
+
+.founder-image-wrapper {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 95%;
+  z-index: 5;
+  overflow: visible;
+}
+
+.founder-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.founder-image-wrapper .founder-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-gray-200);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-400);
+}
+
+@media (max-width: 768px) {
+  .founder-portrait-container {
+    max-width: 280px;
+    transform: scale(0.8);
+    margin: 0 auto;
+  }
+}

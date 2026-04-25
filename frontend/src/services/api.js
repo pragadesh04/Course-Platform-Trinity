@@ -136,4 +136,6 @@ export const settingsService = {
   updateContact: (data) => api.put('/settings/contact', data),
   getFounder: () => api.get('/settings/founder'),
   updateFounder: (data) => api.put('/settings/founder', data),
+  getHero: () => api.get('/settings/hero'),
+  updateHero: (data) => api.put('/settings/hero', data),
 };

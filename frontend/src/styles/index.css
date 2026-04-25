@@ -93,6 +93,35 @@ img {
   font-size: 14px;
   transition: all var(--transition-base);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn:hover::after {
+  transform: scaleX(1);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+@media (hover: none) {
+  .btn::after {
+    display: none;
+  }
 }
 
 .btn-primary {
@@ -125,6 +154,15 @@ img {
 .btn-outline:hover {
   background: var(--color-gold);
   color: var(--color-charcoal);
+}
+
+.btn .btn-icon {
+  display: inline-flex;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.3s ease;
+}
+
+.btn:hover .btn-icon {
+  transform: translateX(4px);
 }
 
 .input {

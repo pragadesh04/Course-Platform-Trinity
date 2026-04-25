@@ -1,16 +1,22 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Scissors, Package, User } from 'lucide-react';
 import CourseCard from '../components/UI/CourseCard';
 import ProductCard from '../components/UI/ProductCard';
 import { AnimatedSection, SectionTitle } from '../components/UI/Animations';
 import ArchitecturalLines from '../components/UI/ArchitecturalLines';
+import FounderPortrait from '../components/UI/FounderPortrait';
 import { courseService, productService } from '../services/api';
 import { API_BASE_URL } from '../config';
 import { useState, useEffect } from 'react';
 import './Home.css';
 
 export default function Home() {
+    const { scrollY } = useScroll();
+    const y1 = useTransform(scrollY, [0, 500], [0, 100]);
+    const y2 = useTransform(scrollY, [0, 500], [0, -50]);
+    const y3 = useTransform(scrollY, [0, 500], [0, -80]);
+    
     const [featuredCourses, setFeaturedCourses] = useState([]);
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [testimonials, setTestimonials] = useState([]);
@@ -18,18 +24,20 @@ export default function Home() {
     const [founderImages, setFounderImages] = useState([]);
     const [founder, setFounder] = useState(null);
     const [stats, setStats] = useState({ students: 0, students_display: '0' });
+    const [hero, setHero] = useState({ title: '', subtitle: '', image_url: '' });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const [courses, products, testimonialsData, galleryData, founderData, statsData] = await Promise.all([
+                const [courses, products, testimonialsData, galleryData, founderData, statsData, heroData] = await Promise.all([
                     courseService.getAll({ featured: true }),
                     productService.getAll({ featured: true }),
                     fetch(`${API_BASE_URL}/testimonials`).then(r => r.json()).catch(() => []),
                     fetch(`${API_BASE_URL}/gallery`).then(r => r.json()).catch(() => []),
                     fetch(`${API_BASE_URL}/settings/founder`).then(r => r.json()).catch(() => null),
                     fetch(`${API_BASE_URL}/settings/stats`).then(r => r.json()).catch(() => ({ students: 0 })),
+                    fetch(`${API_BASE_URL}/settings/hero`).then(r => r.json()).catch(() => ({ title: '', subtitle: '', image_url: '' })),
                 ]);
 
                 setFeaturedCourses(courses.slice(0, 4));
@@ -45,6 +53,7 @@ export default function Home() {
                 setFounderImages(galleryItems.filter(item => item.type === 'founder'));
                 setFounder(founderData);
                 setStats(statsData);
+                setHero(heroData);
             } catch (error) {
                 console.error('Failed to fetch homepage data:', error);
             } finally {
@@ -71,12 +80,11 @@ export default function Home() {
                             Premium Tailoring Education
                         </span>
                         <h1 className="hero-title">
-                            Master the Art of
+                            {hero.title || 'Master the Art of'}
                             <span className="text-gold"> Tailoring</span>
                         </h1>
                         <p className="hero-subtitle">
-                            Learn professional dressmaking, alterations, and crafting from industry experts.
-                            Transform your passion into a profitable skill.
+                            {hero.subtitle || 'Learn professional dressmaking, alterations, and crafting from industry experts. Transform your passion into a profitable skill.'}
                         </p>
                         <div className="hero-actions">
                             <Link to="/courses" className="btn btn-primary btn-lg">
@@ -91,17 +99,24 @@ export default function Home() {
                     </motion.div>
                 </div>
                 <div className="hero-visual">
-                    <div className="hero-image-wrapper">
+                    <motion.div 
+                        className="hero-image-wrapper"
+                        style={{ y: y1 }}
+                    >
                         <img
-                            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600"
+                            src={hero.image_url || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600"}
                             alt="Tailoring craftsmanship"
                             className="hero-image"
                         />
-                        <div className="hero-float-card">
+                        <motion.div 
+                            className="hero-float-card"
+                            animate={{ y: [0, -15, 0] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        >
                             <Scissors size={24} />
                             <span>{stats.students_display || '0'} Users</span>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
 
@@ -109,23 +124,10 @@ export default function Home() {
                 <div className="container">
                     <div className="founder-grid">
                         <AnimatedSection className="founder-image">
-                            {loading ? (
-                                <div className="founder-placeholder loading">
-                                    <div className="placeholder-spinner" />
-                                </div>
-                            ) : founderImages[0]?.image_url || founder?.image_url ? (
-                                <ArchitecturalLines seed={0.5}>
-                                    <img
-                                        src={founderImages[0]?.image_url || founder?.image_url}
-                                        alt={founder?.name || "Founder"}
-                                    />
-                                </ArchitecturalLines>
-                            ) : (
-                                <div className="founder-placeholder">
-                                    <User size={64} strokeWidth={1} />
-                                    <span>Founder Image</span>
-                                </div>
-                            )}
+                            <FounderPortrait 
+                                imageUrl={founderImages[0]?.image_url || founder?.image_url}
+                                name={founder?.name}
+                            />
                         </AnimatedSection>
                         <AnimatedSection className="founder-content" delay={0.2}>
                             <span className="section-label">Our Story</span>

@@ -1,12 +1,17 @@
-import { motion } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Play, Clock, Users } from 'lucide-react';
+import { useState } from 'react';
 import Image from './Image';
 import './CourseCard.css';
 
 const COURSE_PLACEHOLDER = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Course';
 
 export default function CourseCard({ course }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const mouseX = useSpring(0, { stiffness: 300, damping: 30 });
+  const mouseY = useSpring(0, { stiffness: 300, damping: 30 });
+
   const formatPrice = (price) => {
     if (!price && price !== 0) return 'Free';
     if (price === 0) return 'Free';
@@ -25,12 +30,42 @@ export default function CourseCard({ course }) {
 
   const thumbnailSrc = course.thumbnail_url || COURSE_PLACEHOLDER;
 
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x * 10);
+    mouseY.set(y * 10);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  const rotateX = useMotionTemplate`${mouseY}deg`;
+  const rotateY = useMotionTemplate`${-mouseX}deg`;
+
   return (
     <motion.div
       className="course-card"
+      style={{
+        transformStyle: 'preserve-3d',
+        rotateX,
+        rotateY,
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       whileHover={{ y: -8 }}
       transition={{ duration: 0.3 }}
     >
+      <div className="card-shine" style={{ opacity: isHovered ? 1 : 0 }} />
       <div className="course-thumbnail">
         <Image 
           src={thumbnailSrc} 
@@ -65,13 +100,22 @@ export default function CourseCard({ course }) {
         </div>
 
         <div className="course-footer">
-          <div className="course-price">
+          <motion.div 
+            className="course-price"
+            animate={{ y: isHovered ? -4 : 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
             <span className="price-label">Starting at</span>
             <span className="price-value">{formatPrice(lowestPrice)}</span>
-          </div>
-          <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
-            View Course
-          </Link>
+          </motion.div>
+          <motion.div
+            animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
+              View Course
+            </Link>
+          </motion.div>
         </div>
       </div>
     </motion.div>

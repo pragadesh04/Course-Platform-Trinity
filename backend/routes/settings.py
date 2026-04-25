@@ -157,3 +157,34 @@ async def get_stats():
         "students_display": display_students,
         "experience_years": display_experience,
     }
+
+
+@router.get("/hero")
+async def get_hero_settings():
+    settings = await settings_collection.find_one({"key": "hero"})
+    if settings:
+        return settings.get(
+            "data",
+            {
+                "title": "Master the Art of Tailoring",
+                "subtitle": "Learn professional dressmaking, alterations, and crafting from industry experts. Transform your passion into a profitable skill.",
+                "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
+            },
+        )
+    return {
+        "title": "Master the Art of Tailoring",
+        "subtitle": "Learn professional dressmaking, alterations, and crafting from industry experts. Transform your passion into a profitable skill.",
+        "image_url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
+    }
+
+
+@router.put("/hero")
+async def update_hero_settings(
+    data: dict, admin: UserResponse = Depends(get_admin_user)
+):
+    await settings_collection.update_one(
+        {"key": "hero"},
+        {"$set": {"data": data, "updated_at": datetime.utcnow()}},
+        upsert=True,
+    )
+    return {"message": "Hero settings updated"}

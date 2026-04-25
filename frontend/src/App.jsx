@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import WhatsAppButton from './components/UI/WhatsAppButton';
+import SmoothScroll from './components/UI/SmoothScroll';
+import CustomCursor from './components/UI/Cursor';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
@@ -22,31 +24,35 @@ import './styles/index.css';
 function AppContent() {
   const location = useLocation();
   const isPlayerPage = location.pathname.startsWith('/course/');
+  const isAdminPage = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   return (
-    <div className="app">
-      {!isPlayerPage && <Navbar />}
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseDetail />} />
-          <Route path="/course/:courseId/play/:sessionIndex" element={<Player />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </main>
-      {!isPlayerPage && <Footer />}
-      {!isPlayerPage && <WhatsAppButton />}
-    </div>
+    <SmoothScroll>
+      <CustomCursor />
+      <div className="app">
+        {!isPlayerPage && !isAdminPage && <Navbar />}
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses/:id" element={<CourseDetail />} />
+            <Route path="/course/:courseId/play/:sessionIndex" element={<Player />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+        {!isPlayerPage && !isAdminPage && <Footer />}
+        {!isPlayerPage && !isAdminPage && <WhatsAppButton />}
+      </div>
+    </SmoothScroll>
   );
 }
 

@@ -12,6 +12,8 @@ export default function Image({ src, alt, fallback, className, style, onLoad, ..
     if (onLoad) onLoad(e);
   };
   
+  const isCloudinary = imageSrc && imageSrc.includes('cloudinary.com');
+  
   const handleError = () => {
     setError(true);
     setLoaded(true);
@@ -44,6 +46,7 @@ export default function Image({ src, alt, fallback, className, style, onLoad, ..
         src={error ? fallbackSrc : imageSrc}
         alt={alt}
         className={className}
+        crossOrigin={isCloudinary ? "anonymous" : undefined}
         style={{
           ...style,
           opacity: loaded ? 1 : 0,

@@ -192,6 +192,9 @@ async def update_course(
     if "prices" in update_data and update_data["prices"]:
         update_data["prices"] = update_data["prices"]
 
+    old_video_links = existing.get("video_links", [])
+    new_video_links = update_data.get("video_links", old_video_links)
+    
     if "video_links" in update_data:
         update_data["sessions"] = len(update_data["video_links"])
 
@@ -222,6 +225,42 @@ async def update_course(
     print(
         f"[DEBUG PUT] Updated course is_first_session_free: {updated.get('is_first_session_free')}"
     )
+
+    old_session_titles = existing.get("session_titles", [])
+    new_session_titles = updated.get("session_titles", [])
+    
+    if len(new_session_titles) > len(old_session_titles):
+        new_sessions_count = len(new_session_titles) - len(old_session_titles)
+        new_sessions = new_session_titles[-new_sessions_count:] if new_session_titles else []
+        
+        from database import enrollments_collection, notifications_collection
+        from datetime import datetime
+        
+        enrolled_users = await enrollments_collection.find({"course_id": course_id}).to_list(None)
+        
+        if enrolled_users and new_sessions:
+            notifications = []
+            course_title = existing.get("title", "the course")
+            
+            for enrollment in enrolled_users:
+                user_id = enrollment.get("user_id")
+                if not user_id:
+                    continue
+                    
+                for session_title in new_sessions:
+                    notifications.append({
+                        "user_id": user_id,
+                        "course_id": course_id,
+                        "session_title": session_title,
+                        "message": f"A new session '{session_title}' has been added to your course '{course_title}'!",
+                        "type": "course_update",
+                        "is_read": False,
+                        "created_at": datetime.utcnow(),
+                    })
+            
+            if notifications:
+                await notifications_collection.insert_many(notifications)
+
     response = course_helper(updated)
     response["category_name"] = await get_category_name(updated.get("category_id"))
     return response

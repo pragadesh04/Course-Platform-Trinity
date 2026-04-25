@@ -53,6 +53,11 @@ from .enrollment import (
     BulkEnrollmentCreate,
     BulkEnrollmentResponse,
 )
+from .notification import (
+    NotificationBase,
+    NotificationCreate,
+    NotificationResponse,
+)
 
 __all__ = [
     "UserCreate",
@@ -92,4 +97,7 @@ __all__ = [
     "EnrollmentStatus",
     "BulkEnrollmentCreate",
     "BulkEnrollmentResponse",
+    "NotificationBase",
+    "NotificationCreate",
+    "NotificationResponse",
 ]
