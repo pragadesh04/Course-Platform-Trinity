@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart, Zap } from 'lucide-react';
+import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart, Zap, Award, DollarSign, Calendar } from 'lucide-react';
+import { courseService, orderService, settingsService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config';
+import Image from '../components/UI/Image';
+import SessionComments from '../components/UI/SessionComments';
+import FeedbackForm from '../components/UI/FeedbackForm';
+import PaymentModal from '../components/UI/PaymentModal';
+import Certificate from '../components/UI/Certificate';
+import './CourseDetail.css';
 
 function formatDuration(minutes) {
   if (!minutes || minutes <= 0) return '0 min';
@@ -10,13 +19,6 @@ function formatDuration(minutes) {
   if (mins === 0) return `${hrs} hr`;
   return `${hrs} hr ${mins} min`;
 }
-import { courseService, orderService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import Image from '../components/UI/Image';
-import SessionComments from '../components/UI/SessionComments';
-import FeedbackForm from '../components/UI/FeedbackForm';
-import PaymentModal from '../components/UI/PaymentModal';
-import './CourseDetail.css';
 
 export default function CourseDetail() {
   const { id } = useParams();
@@ -25,16 +27,27 @@ export default function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [expandedSessions, setExpandedSessions] = useState({});
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [ordering, setOrdering] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [courseProgress, setCourseProgress] = useState([]);
+  const [stats, setStats] = useState({ students: 0, courses: 0, experience_years: 10 });
+  const [showCertificate, setShowCertificate] = useState(false);
 
   useEffect(() => {
     fetchCourse();
+    fetchStats();
     if (user) fetchEnrolledCourses();
   }, [id, user]);
+
+  const fetchStats = async () => {
+    try {
+      const data = await settingsService.getStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  };
 
   const isEnrolled = enrolledCourses.includes(id);
 
@@ -94,16 +107,14 @@ export default function CourseDetail() {
     return sorted[0]?.session_idx ?? 0;
   };
 
-  const toggleSession = (index) => {
-    setExpandedSessions((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
   const handleEnroll = () => {
     if (!user) {
       navigate('/login', { state: { from: `/courses/${id}` } });
+      return;
+    }
+    if (!course) return;
+    if (course.is_free) {
+      enrollForFree();
       return;
     }
     if (!selectedPlan) {
@@ -111,6 +122,43 @@ export default function CourseDetail() {
       return;
     }
     setShowPaymentModal(true);
+  };
+
+  const enrollForFree = async () => {
+    setOrdering(true);
+    try {
+      const token = localStorage.getItem('course_better_token');
+      
+      const res = await fetch(`${API_BASE_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify({
+          items: [{
+            item_id: id,
+            item_type: 'course',
+            title: course.title,
+            price: 0,
+            plan: 'lifetime',
+          }],
+        }),
+      });
+      
+      if (res.ok) {
+        fetchEnrolledCourses();
+        navigate(`/course/${id}/play/0`);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData?.detail || JSON.stringify(errData) || 'Failed to enroll');
+      }
+    } catch (error) {
+      console.error('Failed to enroll:', error);
+      alert('Failed to enroll: ' + (error?.message || error?.toString() || 'Unknown error'));
+    } finally {
+      setOrdering(false);
+    }
   };
 
   const handleWatchFree = (sessionIndex) => {
@@ -122,7 +170,8 @@ export default function CourseDetail() {
   };
 
   const formatPrice = (price) => {
-    if (!price || price === 0) return 'Free';
+    if (!price && price !== 0) return 'Free';
+    if (price === 0) return 'Free';
     return `₹${price.toLocaleString()}`;
   };
 
@@ -192,6 +241,66 @@ export default function CourseDetail() {
       <div className="container">
         <div className="course-content-grid">
           <div className="course-main">
+            {course.what_you_will_learn?.length > 0 && (
+              <section className="course-section">
+                <h2><Award size={20} /> What You'll Learn</h2>
+                <ul className="what-you-will-learn-list">
+                  {course.what_you_will_learn.map((item, index) => (
+                    <li key={index}>
+                      <CheckCircle size={18} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {course.prerequisites?.length > 0 && (
+              <section className="course-section">
+                <h2><DollarSign size={20} /> Prerequisites</h2>
+                <ul className="prerequisites-list">
+                  {course.prerequisites.map((item, index) => (
+                    <li key={index}>
+                      <CheckCircle size={18} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {course.instructor_info?.name && (
+              <section className="course-section">
+                <h2><Users size={20} /> Meet Your Instructor</h2>
+                <div className="instructor-card">
+                  {course.instructor_info.photo_url ? (
+                    <img 
+                      src={course.instructor_info.photo_url} 
+                      alt={course.instructor_info.name}
+                      className="instructor-photo"
+                    />
+                  ) : (
+                    <div className="instructor-photo-placeholder">
+                      <Users size={40} />
+                    </div>
+                  )}
+                  <div className="instructor-details">
+                    <h3>{course.instructor_info.name}</h3>
+                    <p className="instructor-bio">{course.instructor_info.bio}</p>
+                    {Object.keys(course.instructor_info.social_links || {}).length > 0 && (
+                      <div className="instructor-social-links">
+                        {course.instructor_info.social_links.instagram && (
+                          <a href={course.instructor_info.social_links.instagram} target="_blank" rel="noopener noreferrer">
+                            <Users size={20} />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
             <section className="course-section">
               <h2><BookOpen size={20} /> Course Sessions</h2>
               <div className="sessions-list">
@@ -200,57 +309,68 @@ export default function CourseDetail() {
                   const progressEntry = courseProgress.find(p => p.session_idx === index);
                   const isCompleted = progressEntry?.completed;
                   return (
-                  <div key={index} className={`session-item ${expandedSessions[index] ? 'expanded' : ''} ${isCompleted ? 'completed' : ''}`}>
-                    <button 
-                      className="session-header"
-                      onClick={() => toggleSession(index)}
-                    >
+                  <div key={index} className={`session-item ${isCompleted ? 'completed' : ''}`}>
+                    <div className="session-header">
                       <span className="session-number">Session {index + 1}</span>
                       {session.is_free && <span className="free-preview-badge">Free Preview</span>}
                       {isEnrolled && isCompleted && <span className="completed-badge"><CheckCircle size={12} /></span>}
                       <span className="session-title">{session.title}</span>
                       <span className="session-duration">{formatDuration(session.duration)}</span>
-                      {expandedSessions[index] ? (
-                        <ChevronUp size={20} />
+                    </div>
+                    <div className="session-content">
+                      <p>{session.description}</p>
+                      {session.is_free ? (
+                        <button 
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleWatchFree(index)}
+                        >
+                          <Play size={16} /> Watch Preview
+                        </button>
+                      ) : canAccess ? (
+                        <button 
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleWatchFree(index)}
+                        >
+                          <Play size={16} /> Watch Video
+                        </button>
                       ) : (
-                        <ChevronDown size={20} />
-                      )}
-                    </button>
-                    {expandedSessions[index] && (
-                      <div className="session-content">
-                        <p>{session.description}</p>
-                        {session.is_free ? (
-                          <button 
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleWatchFree(index)}
-                          >
-                            <Play size={16} /> Watch Preview
-                          </button>
-                        ) : canAccess ? (
-                          <button 
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleWatchFree(index)}
-                          >
-                            <Play size={16} /> Watch Video
-                          </button>
-                        ) : (
-                          <div className="session-locked">
-                            <p>Enroll to access this video</p>
-                          </div>
-                        )}
-                        <div className="session-comments-section">
-                          <SessionComments 
-                            courseId={id} 
-                            sessionIndex={index}
-                            isEnrolled={isEnrolled}
-                          />
+                        <div className="session-locked">
+                          <p>Enroll to access this video</p>
                         </div>
+                      )}
+                      <div className="session-comments-section">
+                        <SessionComments 
+                          courseId={id} 
+                          sessionIndex={index}
+                          isEnrolled={isEnrolled}
+                        />
                       </div>
-                    )}
-                  </div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
+
+              {isEnrolled && (
+                <div className="enrolled-cta-buttons">
+                  <button
+                    onClick={() => navigate(`/course/${id}/play/${getLastWatchedIndex()}`)}
+                    className="btn btn-primary btn-lg start-learning-btn"
+                  >
+                    <Zap size={18} />
+                    {getLastWatchedIndex() > 0 ? 'Resume Learning' : 'Start Learning'}
+                  </button>
+                  {getOverallProgress() === 100 && (
+                    <button
+                      onClick={() => setShowCertificate(true)}
+                      className="btn btn-primary btn-lg certificate-btn"
+                    >
+                      <Award size={18} />
+                      Download Certificate
+                    </button>
+                  )}
+                </div>
+              )}
             </section>
 
             <section className="course-section">
@@ -267,12 +387,17 @@ export default function CourseDetail() {
                 <div className="enrolled-info">
                   <CheckCircle size={48} />
                   <p>You have access to all course content</p>
+                </div>
+              ) : course.is_free ? (
+                <div className="free-enrollment">
+                  <p className="free-label">Free Course</p>
                   <button
-                    onClick={() => navigate(`/course/${id}/play/${getLastWatchedIndex()}`)}
-                    className="btn btn-primary btn-lg start-learning-btn"
+                    onClick={handleEnroll}
+                    disabled={ordering}
+                    className="btn btn-primary btn-lg"
                   >
                     <Zap size={18} />
-                    {getLastWatchedIndex() > 0 ? 'Resume Learning' : 'Start Learning'}
+                    {ordering ? 'Enrolling...' : 'Enroll for Free'}
                   </button>
                 </div>
               ) : (
@@ -327,7 +452,6 @@ export default function CourseDetail() {
 
                   <button
                     onClick={handleEnroll}
-                    disabled={!selectedPlan}
                     className="btn btn-primary btn-lg"
                   >
                     <ShoppingCart size={18} />
@@ -345,6 +469,15 @@ export default function CourseDetail() {
                 <li><Users size={16} /> Access on mobile and desktop</li>
                 <li><BookOpen size={16} /> Downloadable resources</li>
               </ul>
+            </div>
+
+            <div className="course-info-card">
+              <h4>Course Stats</h4>
+              <div className="dynamic-stats">
+                <span><Users size={16} /> {stats.students_display || '0'} students</span>
+                <span><BookOpen size={16} /> {stats.experience_years}+ years</span>
+                <span><Calendar size={16} /> Updated recently</span>
+              </div>
             </div>
           </aside>
         </div>
@@ -364,6 +497,14 @@ export default function CourseDetail() {
           total={course.prices[selectedPlan]}
           onSuccess={handlePaymentSuccess}
           title="Enroll in Course"
+        />
+      )}
+
+      {showCertificate && user && (
+        <Certificate
+          userName={user.name}
+          courseName={course.title}
+          onClose={() => setShowCertificate(false)}
         />
       )}
     </div>

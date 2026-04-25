@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Optional
 from datetime import datetime
 
 
@@ -17,17 +17,28 @@ class SessionInfo(BaseModel):
     is_free: bool = False
 
 
+class InstructorInfo(BaseModel):
+    name: str = ""
+    bio: str = ""
+    photo_url: str = ""
+    social_links: dict = {}
+
+
 class CourseBase(BaseModel):
     title: str
     description: str
     thumbnail_url: str = ""
     prices: CoursePrices = Field(default_factory=CoursePrices)
-    video_links: List[str] = []
-    session_durations: List[float] = []
-    session_titles: List[str] = []
+    video_links: list = []
+    session_durations: list = []
+    session_titles: list = []
     category_id: Optional[str] = None
     featured: bool = False
     is_first_session_free: bool = False
+    is_free: bool = False
+    what_you_will_learn: list = []
+    prerequisites: list = []
+    instructor_info: InstructorInfo = Field(default_factory=InstructorInfo)
 
 
 class CourseCreate(CourseBase):
@@ -39,12 +50,16 @@ class CourseUpdate(BaseModel):
     description: Optional[str] = None
     thumbnail_url: Optional[str] = None
     prices: Optional[CoursePrices] = None
-    video_links: Optional[List[str]] = None
-    session_durations: Optional[List[float]] = None
-    session_titles: Optional[List[str]] = None
+    video_links: Optional[list] = None
+    session_durations: Optional[list] = None
+    session_titles: Optional[list] = None
     category_id: Optional[str] = None
     featured: Optional[bool] = None
-    is_first_session_free: bool = False
+    is_first_session_free: Optional[bool] = None
+    is_free: Optional[bool] = None
+    what_you_will_learn: Optional[list] = None
+    prerequisites: Optional[list] = None
+    instructor_info: Optional[InstructorInfo] = None
 
 
 class CourseResponse(CourseBase):
@@ -53,7 +68,7 @@ class CourseResponse(CourseBase):
     duration: float = 0
     created_at: datetime
     category_name: str = ""
-    sessions_list: List[SessionInfo] = []
+    sessions_list: list = []
 
     class Config:
         from_attributes = True

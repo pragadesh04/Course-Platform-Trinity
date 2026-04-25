@@ -127,3 +127,13 @@ export const enrollmentService = {
   },
   bulkCreate: (data) => api.post('/admin/enrollments/bulk', data),
 };
+
+export const settingsService = {
+  getStats: () => api.get('/settings/stats'),
+  getAbout: () => api.get('/settings/about'),
+  updateAbout: (data) => api.put('/settings/about', data),
+  getContact: () => api.get('/settings/contact'),
+  updateContact: (data) => api.put('/settings/contact', data),
+  getFounder: () => api.get('/settings/founder'),
+  updateFounder: (data) => api.put('/settings/founder', data),
+};

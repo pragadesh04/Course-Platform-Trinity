@@ -8,17 +8,20 @@ const COURSE_PLACEHOLDER = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Cour
 
 export default function CourseCard({ course }) {
   const formatPrice = (price) => {
+    if (!price && price !== 0) return 'Free';
     if (price === 0) return 'Free';
     return `₹${price.toLocaleString()}`;
   };
 
-  const lowestPrice = course.prices 
-    ? Math.min(
-        course.prices.m3 || Infinity,
-        course.prices.m6 || Infinity,
-        course.prices.lifetime || Infinity
-      )
-    : 0;
+  const getLowestPrice = () => {
+    if (course.is_free) return 0;
+    if (!course.prices) return 0;
+    const prices = [course.prices.m3, course.prices.m6, course.prices.lifetime].filter(p => p && p > 0);
+    if (prices.length === 0) return 0;
+    return Math.min(...prices);
+  };
+  
+  const lowestPrice = getLowestPrice();
 
   const thumbnailSrc = course.thumbnail_url || COURSE_PLACEHOLDER;
 

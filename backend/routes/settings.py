@@ -6,6 +6,7 @@ from database import (
     courses_collection,
     products_collection,
     orders_collection,
+    user_progress_collection,
 )
 from schemas import UserResponse
 from auth import get_admin_user
@@ -133,10 +134,14 @@ async def get_stats():
     orders_count = await orders_collection.count_documents({})
     users_count = await users_collection.count_documents({})
 
+    unique_students_cursor = user_progress_collection.distinct("user_id")
+    unique_students = await unique_students_cursor
+    students_count = len(unique_students)
+
     about_settings = await settings_collection.find_one({"key": "about"})
     about_data = about_settings.get("data", {}) if about_settings else {}
 
-    display_students = round_students(users_count)
+    display_students = round_students(students_count)
     display_experience = about_data.get("experience_years", 10)
     display_courses = (
         str(courses_count) if courses_count < 50 else f"{((courses_count // 10) * 10)}+"
@@ -148,7 +153,7 @@ async def get_stats():
         "products": products_count,
         "orders": orders_count,
         "users": users_count,
-        "students": users_count,
+        "students": students_count,
         "students_display": display_students,
         "experience_years": display_experience,
     }

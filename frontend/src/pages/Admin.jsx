@@ -380,6 +380,15 @@ function CourseForm({ course, onClose, onSave }) {
             m6: course?.prices?.m6 || 0,
             lifetime: course?.prices?.lifetime || 0,
         },
+        is_free: course?.prices?.m3 === 0 && course?.prices?.m6 === 0 && course?.prices?.lifetime === 0,
+        what_you_will_learn: course?.what_you_will_learn?.join('\n') || '',
+        prerequisites: course?.prerequisites?.join('\n') || '',
+        instructor_info: {
+            name: course?.instructor_info?.name || '',
+            bio: course?.instructor_info?.bio || '',
+            photo_url: course?.instructor_info?.photo_url || '',
+            social_links: course?.instructor_info?.social_links || {},
+        },
     });
     const [saving, setSaving] = useState(false);
     const [fetchingMetadata, setFetchingMetadata] = useState(false);
@@ -408,6 +417,23 @@ function CourseForm({ course, onClose, onSave }) {
                     session_titles: data.metadata.map(m => m.title).join('\n'),
                     session_durations: data.metadata.map(m => m.duration.toString()).join('\n'),
                 }));
+
+                const aiRes = await fetch(`${API_BASE_URL}/courses/generate-ai-content`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(data.metadata),
+                });
+                const aiData = await aiRes.json();
+                if (aiData.what_you_will_learn) {
+                    setFormData(prev => ({
+                        ...prev,
+                        what_you_will_learn: aiData.what_you_will_learn.join('\n'),
+                        prerequisites: aiData.prerequisites?.join('\n') || '',
+                    }));
+                }
             }
         } catch (error) {
             console.error('Failed to fetch metadata:', error);
@@ -461,9 +487,18 @@ function CourseForm({ course, onClose, onSave }) {
                 video_links: videoLinks,
                 session_durations: durations,
                 session_titles: titles,
-                prices: formData.prices,
+                prices: formData.is_free ? { m3: 0, m6: 0, lifetime: 0 } : formData.prices,
                 featured: formData.featured,
                 is_first_session_free: formData.is_first_session_free,
+                is_free: formData.is_free,
+                what_you_will_learn: formData.what_you_will_learn.split('\n').filter(t => t.trim()),
+                prerequisites: formData.prerequisites.split('\n').filter(t => t.trim()),
+                instructor_info: {
+                    name: formData.instructor_info.name,
+                    bio: formData.instructor_info.bio,
+                    photo_url: formData.instructor_info.photo_url,
+                    social_links: formData.instructor_info.social_links,
+                },
             };
             if (course) {
                 await courseService.update(course.id, data);
@@ -559,6 +594,7 @@ function CourseForm({ course, onClose, onSave }) {
                             ...formData,
                             prices: { ...formData.prices, m3: parseFloat(e.target.value) || 0 },
                         })}
+                        disabled={formData.is_free}
                     />
                 </div>
                 <div className="form-group">
@@ -571,6 +607,7 @@ function CourseForm({ course, onClose, onSave }) {
                             ...formData,
                             prices: { ...formData.prices, m6: parseFloat(e.target.value) || 0 },
                         })}
+                        disabled={formData.is_free}
                     />
                 </div>
                 <div className="form-group">
@@ -583,8 +620,23 @@ function CourseForm({ course, onClose, onSave }) {
                             ...formData,
                             prices: { ...formData.prices, lifetime: parseFloat(e.target.value) || 0 },
                         })}
+                        disabled={formData.is_free}
                     />
                 </div>
+            </div>
+            <div className="form-group checkbox">
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={formData.is_free}
+                        onChange={(e) => setFormData({ 
+                            ...formData, 
+                            is_free: e.target.checked,
+                            prices: e.target.checked ? { m3: 0, m6: 0, lifetime: 0 } : formData.prices
+                        })}
+                    />
+                    Free Course (No payment required)
+                </label>
             </div>
             <div className="form-group checkbox">
                 <label>
@@ -606,6 +658,63 @@ function CourseForm({ course, onClose, onSave }) {
                     First Session Free
                 </label>
             </div>
+            <div className="form-group">
+                <label>What You'll Learn (one point per line)</label>
+                <textarea
+                    className="input"
+                    rows={4}
+                    placeholder="Master the art of button making&#10;Learn fabric selection techniques&#10;Understand fitting adjustments"
+                    value={formData.what_you_will_learn}
+                    onChange={(e) => setFormData({ ...formData, what_you_will_learn: e.target.value })}
+                />
+            </div>
+            <div className="form-group">
+                <label>Prerequisites (one per line)</label>
+                <textarea
+                    className="input"
+                    rows={3}
+                    placeholder="Basic sewing knowledge&#10;Sewing machine access"
+                    value={formData.prerequisites}
+                    onChange={(e) => setFormData({ ...formData, prerequisites: e.target.value })}
+                />
+            </div>
+            <fieldset className="form-fieldset">
+                <legend>Instructor Information</legend>
+                <div className="form-group">
+                    <label>Instructor Name</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={formData.instructor_info.name}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            instructor_info: { ...formData.instructor_info, name: e.target.value }
+                        })}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Instructor Bio</label>
+                    <textarea
+                        className="input"
+                        rows={3}
+                        value={formData.instructor_info.bio}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            instructor_info: { ...formData.instructor_info, bio: e.target.value }
+                        })}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Instructor Photo URL</label>
+                    <ImageUploader
+                        value={formData.instructor_info.photo_url}
+                        onChange={(url) => setFormData({
+                            ...formData,
+                            instructor_info: { ...formData.instructor_info, photo_url: url }
+                        })}
+                    />
+                </div>
+            </fieldset>
             <div className="form-actions">
                 <button type="button" className="btn btn-secondary" onClick={onClose}>
                     Cancel

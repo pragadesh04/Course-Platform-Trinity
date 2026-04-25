@@ -42,6 +42,21 @@ def course_helper(course, include_sessions: bool = False) -> dict:
         sum(session_durations) if session_durations else course.get("duration", 0)
     )
 
+    instructor_info = course.get("instructor_info", {})
+    if isinstance(instructor_info, dict):
+        instructor_data = {
+            "name": instructor_info.get("name", ""),
+            "bio": instructor_info.get("bio", ""),
+            "photo_url": instructor_info.get("photo_url", ""),
+            "social_links": instructor_info.get("social_links", {}),
+        }
+    else:
+        instructor_data = {"name": "", "bio": "", "photo_url": "", "social_links": {}}
+
+    what_you_will_learn = course.get("what_you_will_learn", [])
+    prerequisites = course.get("prerequisites", [])
+    is_free = course.get("is_free", False)
+
     response_data = {
         "id": str(course["_id"]),
         "title": course["title"],
@@ -58,6 +73,10 @@ def course_helper(course, include_sessions: bool = False) -> dict:
         "category_name": "",
         "sessions_list": sessions_list,
         "is_first_session_free": is_first_session_free,
+        "is_free": is_free,
+        "what_you_will_learn": what_you_will_learn,
+        "prerequisites": prerequisites,
+        "instructor_info": instructor_data,
     }
 
     return response_data
@@ -117,6 +136,12 @@ async def create_course(
     session_titles = course_data.session_titles or []
     total_duration = round(sum(session_durations), 2)
 
+    instructor_info = course_data.instructor_info
+    if instructor_info:
+        instructor_dict = instructor_info.model_dump()
+    else:
+        instructor_dict = {"name": "", "bio": "", "photo_url": "", "social_links": {}}
+
     course_doc = {
         "title": course_data.title,
         "description": course_data.description,
@@ -130,6 +155,10 @@ async def create_course(
         "category_id": course_data.category_id,
         "featured": course_data.featured,
         "is_first_session_free": course_data.is_first_session_free,
+        "is_free": course_data.is_free,
+        "what_you_will_learn": course_data.what_you_will_learn or [],
+        "prerequisites": course_data.prerequisites or [],
+        "instructor_info": instructor_dict,
         "created_at": datetime.utcnow(),
     }
 
@@ -154,9 +183,11 @@ async def update_course(
     if not existing:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    update_data = course_data.model_dump(exclude_unset=True)
-
-    update_data["is_first_session_free"] = course_data.is_first_session_free
+    try:
+        update_data = course_data.model_dump(exclude_unset=True, exclude_none=True)
+    except Exception as e:
+        print(f"[DEBUG] model_dump error: {e}")
+        update_data = {}
 
     if "prices" in update_data and update_data["prices"]:
         update_data["prices"] = update_data["prices"]
@@ -166,6 +197,22 @@ async def update_course(
 
     if "session_durations" in update_data and update_data["session_durations"]:
         update_data["duration"] = round(sum(update_data["session_durations"]), 2)
+
+    if "instructor_info" in update_data and update_data["instructor_info"]:
+        try:
+            if isinstance(update_data["instructor_info"], dict):
+                pass
+            elif hasattr(update_data["instructor_info"], "model_dump"):
+                update_data["instructor_info"] = update_data["instructor_info"].model_dump()
+            else:
+                update_data["instructor_info"] = dict(update_data["instructor_info"])
+        except Exception as e:
+            print(f"[DEBUG] instructor_info conversion error: {e}")
+            if "instructor_info" in update_data:
+                del update_data["instructor_info"]
+
+    update_data["is_first_session_free"] = course_data.is_first_session_free
+    update_data["is_free"] = course_data.is_free
 
     await courses_collection.update_one(
         {"_id": ObjectId(course_id)}, {"$set": update_data}
@@ -194,6 +241,19 @@ async def extract_metadata(urls: List[str]):
 
     metadata = get_video_metadata(urls)
     return {"metadata": metadata}
+
+
+@router.post("/generate-ai-content")
+async def generate_ai_content(sessions: List[dict]):
+    from services.ai import generate_course_metadata
+
+    result = generate_course_metadata(sessions)
+    if result is None:
+        raise HTTPException(
+            status_code=503,
+            detail="AI service unavailable. Please ensure MISTRAL_API_KEY is configured."
+        )
+    return result
 
 
 @router.get("/{course_id}/progress", response_model=List[UserProgressResponse])

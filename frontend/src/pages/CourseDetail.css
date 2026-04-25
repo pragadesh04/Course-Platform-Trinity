@@ -109,8 +109,8 @@
 .course-section {
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -127,27 +127,63 @@
 .sessions-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .session-item {
   border: 1px solid var(--color-gray-200);
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
+  margin: 0;
 }
 
 .session-header {
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background: var(--color-gray-100);
   border: none;
-  cursor: pointer;
-  text-align: left;
   font-size: 1rem;
-  transition: background 0.2s;
+}
+
+.session-header > * {
+  flex-shrink: 0;
+}
+
+.session-header .session-title {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.session-header .session-duration {
+  flex: 0 0 auto;
+}
+
+.chevron-icon {
+  display: none;
+}
+
+.session-header > * {
+  flex-shrink: 0;
+}
+
+.session-header .session-title {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.session-header .session-duration {
+  flex: 0 0 auto;
+}
+
+.chevron-icon {
+  flex-shrink: 0;
+  color: var(--color-gray-400);
 }
 
 .session-header:hover {
@@ -155,8 +191,8 @@
 }
 
 .session-number {
-  background: var(--color-gold);
-  color: var(--color-charcoal);
+  background: #1A1A1A;
+  color: white;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -192,34 +228,22 @@
 }
 
 .session-title {
-  flex: 1;
-  font-weight: 500;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.session-item.expanded .session-title {
-  -webkit-line-clamp: unset;
+  flex: 1 1 200px;
+  min-width: 0;
+  color: #1A1A1A;
 }
 
 .session-duration {
-  color: var(--color-gray-500);
+  color: #666666;
   font-size: 0.875rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .session-content {
-  padding: 1rem;
+  padding: 0.5rem;
+  margin: 0;
   border-top: 1px solid var(--color-gray-200);
-}
-
-.session-video video {
-  width: 100%;
-  border-radius: 8px;
-  margin: 1rem 0;
 }
 
 .session-locked {
@@ -270,6 +294,18 @@
 .enrolled-info p {
   color: var(--color-gray-600);
   margin: 0;
+}
+
+.free-enrollment {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.free-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #10b981;
+  margin: 0 0 1rem 0;
 }
 
 .start-learning-btn {
@@ -360,10 +396,167 @@
 
 .course-info-card li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   padding: 0.5rem 0;
   color: var(--color-gray-600);
+}
+
+.course-info-card li svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.what-you-will-learn-list,
+.prerequisites-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.what-you-will-learn-list li,
+.prerequisites-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: var(--color-gray-700);
+}
+
+.what-you-will-learn-list li svg {
+  flex-shrink: 0;
+  color: #10b981;
+  margin-top: 0.125rem;
+}
+
+.prerequisites-list li svg {
+  flex-shrink: 0;
+  color: var(--color-gold);
+  margin-top: 0.125rem;
+}
+
+.instructor-card {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.instructor-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-gold);
+}
+
+.instructor-photo-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--color-gold);
+  flex-shrink: 0;
+}
+
+.instructor-details h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.instructor-bio {
+  color: var(--color-gray-600);
+  line-height: 1.6;
+}
+
+.instructor-social-links {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.instructor-social-links a {
+  color: var(--color-gray-500);
+  transition: color 0.2s;
+}
+
+.instructor-social-links a:hover {
+  color: var(--color-gold);
+}
+
+.dynamic-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-100);
+  margin-bottom: 1rem;
+}
+
+.dynamic-stats span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-gray-600);
+  font-size: 0.9rem;
+}
+
+.dynamic-stats svg {
+  color: var(--color-gold);
+}
+
+.certificate-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.certificate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.sticky-mobile-cta {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sticky-mobile-cta {
+    display: flex;
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sticky-mobile-cta .btn {
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .enrolled-cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-gray-200);
+  }
+
+  .enrolled-cta-buttons .btn-lg {
+    width: 100%;
+  }
 }
 
 .spinner {
@@ -396,6 +589,12 @@
   .enrollment-card {
     position: static;
   }
+
+  .course-hero-content > *,
+  .course-content-grid > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 768px) {
@@ -423,6 +622,28 @@
     font-size: 1.1rem;
   }
 
+  .session-header {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .session-header .session-number {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .session-header .session-title {
+    flex: 1 1 100%;
+    font-size: 0.9rem;
+    order: 1;
+    width: 100%;
+  }
+
+  .session-header .session-duration {
+    order: 2;
+    font-size: 0.8rem;
+  }
+
   .session-video video {
     max-height: 56vw;
     object-fit: contain;
@@ -438,18 +659,10 @@
   }
 
   .enrollment-card .btn-lg {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-radius: 0;
-    z-index: 100;
-    padding: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
   }
 
   .course-sidebar {

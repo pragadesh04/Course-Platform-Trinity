@@ -9,6 +9,7 @@ class PaymentMethod(str, Enum):
     PHONEPE = "phonepe"
     CARD = "card"
     ADMIN_GRANTED = "admin_granted"
+    FREE = "free"
 
 
 class OrderStatus(str, Enum):
@@ -30,7 +31,7 @@ class OrderCreate(BaseModel):
     coupon_code: Optional[str] = None
     coupon_discount: Optional[float] = None
     mobile_number: Optional[str] = None
-    payment_method: Optional[PaymentMethod] = None
+    payment_method: Optional[str] = None
 
 
 class OrderResponse(BaseModel):

@@ -187,11 +187,14 @@ export default function Player() {
   const [autoPlayNext, setAutoPlayNext] = useState(true);
   const [showNextCountdown, setShowNextCountdown] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState(5);
+  const [completing, setCompleting] = useState(false);
   const countdownRef = useRef(null);
 
   const currentSession = course?.sessions_list?.[currentIndex];
   const videoUrl = currentSession?.video_url;
   const nextSession = course?.sessions_list?.[currentIndex + 1];
+  
+  const isCurrentSessionCompleted = sessionProgress.some(p => p.session_idx === currentIndex && p.completed);
 
   useEffect(() => {
     fetchCourse();
@@ -261,6 +264,48 @@ export default function Player() {
 
   const handleResume = () => {
     setShowResumePrompt(false);
+  };
+
+  const handleToggleComplete = async () => {
+    if (!user || completing) return;
+    setCompleting(true);
+    
+    try {
+      const token = localStorage.getItem('course_better_token');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      
+      const newCompletedStatus = !isCurrentSessionCompleted;
+      
+      const res = await fetch(`${API_URL}/courses/${courseId}/progress`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': token ? `Bearer ${token}` : '' 
+        },
+        body: JSON.stringify({ 
+          course_id: courseId, 
+          session_idx: currentIndex, 
+          timestamp: currentTime || 0, 
+          completed: newCompletedStatus 
+        }),
+      });
+      
+      if (res.ok) {
+        setSessionProgress(prev => {
+          const existing = prev.findIndex(p => p.session_idx === currentIndex);
+          if (existing >= 0) {
+            const updated = [...prev];
+            updated[existing] = { ...updated[existing], completed: newCompletedStatus, updated_at: new Date().toISOString() };
+            return updated;
+          }
+          return [...prev, { session_idx: currentIndex, timestamp: currentTime || 0, completed: newCompletedStatus, updated_at: new Date().toISOString() }];
+        });
+      }
+    } catch (error) {
+      console.error('Failed to toggle completion:', error);
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const startProgressSync = useCallback(() => {
@@ -400,6 +445,27 @@ export default function Player() {
       <div className="player-info">
         <h2>{currentSession?.title}</h2>
         <p>{currentSession?.description || 'No description available.'}</p>
+        
+        <button 
+          className={`mark-complete-btn ${isCurrentSessionCompleted ? 'completed' : ''}`}
+          onClick={handleToggleComplete}
+          disabled={completing}
+        >
+          {completing ? (
+            <Loader2 size={18} className="spin" />
+          ) : isCurrentSessionCompleted ? (
+            <>
+              <CheckCircle size={18} />
+              Completed
+            </>
+          ) : (
+            <>
+              <CheckCircle size={18} />
+              Mark as Completed
+            </>
+          )}
+        </button>
+        
         <div className="player-nav">
           <button onClick={handlePrevious} disabled={currentIndex === 0}>
             <ChevronLeft size={20} /> Previous
@@ -423,13 +489,18 @@ export default function Player() {
       <div className="player-tab-content">
         {activeTab === 'sessions' && (
           <div className="sessions-list">
-            {course?.sessions_list?.map((session, index) => (
-              <button key={index} className={`session-item ${index === currentIndex ? 'active' : ''}`} onClick={() => handleSessionClick(index)}>
-                <span className="session-num">{index + 1}</span>
+            {course?.sessions_list?.map((session, index) => {
+              const isCompleted = sessionProgress.some(p => p.session_idx === index && p.completed);
+              return (
+              <button key={index} className={`session-item ${index === currentIndex ? 'active' : ''} ${isCompleted ? 'completed' : ''}`} onClick={() => handleSessionClick(index)}>
+                <span className="session-num">
+                  {isCompleted ? <CheckCircle size={14} /> : index + 1}
+                </span>
                 <span className="session-title">{session.title}</span>
                 <span className="session-duration">{Math.round(session.duration)} min</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         )}
         {activeTab === 'comments' && (
