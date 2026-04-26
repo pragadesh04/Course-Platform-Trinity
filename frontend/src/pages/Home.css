@@ -151,6 +151,7 @@
 
 .section-title {
     margin-bottom: 48px;
+    padding: 24px 0;
 }
 
 .section-title.centered {
@@ -158,8 +159,8 @@
 }
 
 .section-title h2 {
-    font-size: clamp(32px, 4vw, 48px);
-    margin-bottom: 16px;
+    font-size: clamp(24px, 3vw, 36px);
+    margin-bottom: 12px;
     background: linear-gradient(135deg, var(--starlight), var(--galactic-violet));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -297,14 +298,16 @@
 .courses-grid,
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .loading-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
 }
 
 .skeleton-card {
@@ -553,7 +556,7 @@
 
     .courses-grid,
     .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: 1fr;
         gap: 16px;
     }
 }

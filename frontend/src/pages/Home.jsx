@@ -149,20 +149,20 @@ export default function Home() {
                 </div>
             </section>
 
-            <section className="featured-courses section bg-white">
+            <section className="featured-products section bg-white">
                 <div className="container">
                     <SectionTitle
                         title="Featured Courses"
                         subtitle="Start your journey with our most popular courses"
                     />
                     {loading ? (
-                        <div className="loading-grid">
+                        <div className="products-grid">
                             {[1, 2, 3, 4].map((i) => (
                                 <div key={i} className="skeleton-card" />
                             ))}
                         </div>
                     ) : featuredCourses.length > 0 ? (
-                        <div className="courses-grid">
+                        <div className="products-grid">
                             {featuredCourses.map((course) => (
                                 <CourseCard key={course.id} course={course} />
                             ))}

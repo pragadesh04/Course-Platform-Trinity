@@ -12,7 +12,7 @@ export default function BackgroundGalaxy() {
     let animationId;
     let stars = [];
     let meteors = [];
-    const MAX_METEORS = 5;
+    const MAX_METEORS = 10;
     
     function resize() {
       canvas.width = window.innerWidth;
@@ -40,13 +40,15 @@ export default function BackgroundGalaxy() {
       if (meteors.length >= MAX_METEORS) return;
       
       const side = Math.random() > 0.5 ? 'left' : 'right';
+      const angle = (Math.random() * 45 + 20) * (Math.PI / 180);
       meteors.push({
-        x: side === 'left' ? Math.random() * canvas.width * 0.3 : canvas.width * 0.7 + Math.random() * canvas.width * 0.3,
-        y: Math.random() * canvas.height * 0.3,
-        speed: Math.random() * 8 + 12,
+        x: side === 'left' ? Math.random() * canvas.width * 0.4 : canvas.width * 0.6 + Math.random() * canvas.width * 0.4,
+        xDir: side === 'left' ? 1 : -1,
+        y: -20,
+        speed: Math.random() * 10 + 15,
         opacity: 1,
-        tailLength: Math.random() * 100 + 80,
-        angle: side === 'left' ? Math.PI / 4 : -Math.PI / 4
+        tailLength: Math.random() * 150 + 100,
+        angle: angle
       });
     }
     
@@ -79,7 +81,7 @@ export default function BackgroundGalaxy() {
         // Draw meteor trail
         const trailGradient = ctx.createLinearGradient(
           meteor.x, meteor.y,
-          meteor.x - Math.cos(meteor.angle) * meteor.tailLength,
+          meteor.x - Math.cos(meteor.angle) * meteor.tailLength * meteor.xDir,
           meteor.y - Math.sin(meteor.angle) * meteor.tailLength
         );
         trailGradient.addColorStop(0, `rgba(138, 43, 226, ${meteor.opacity * 0.8})`);
@@ -89,7 +91,7 @@ export default function BackgroundGalaxy() {
         ctx.beginPath();
         ctx.moveTo(meteor.x, meteor.y);
         ctx.lineTo(
-          meteor.x - Math.cos(meteor.angle) * meteor.tailLength,
+          meteor.x - Math.cos(meteor.angle) * meteor.tailLength * meteor.xDir,
           meteor.y - Math.sin(meteor.angle) * meteor.tailLength
         );
         ctx.strokeStyle = trailGradient;
@@ -103,15 +105,15 @@ export default function BackgroundGalaxy() {
         ctx.fill();
         
         // Move meteor
-        meteor.x += Math.cos(meteor.angle) * meteor.speed;
+        meteor.x += Math.cos(meteor.angle) * meteor.speed * meteor.xDir;
         meteor.y += Math.sin(meteor.angle) * meteor.speed;
-        meteor.opacity -= 0.01;
+        meteor.opacity -= 0.008;
         
         return meteor.opacity > 0 && meteor.y < canvas.height;
       });
       
       // Randomly spawn new meteors
-      if (Math.random() < 0.01) {
+      if (Math.random() < 0.03) {
         createMeteor();
       }
       

@@ -28,21 +28,59 @@ def round_students(count):
 
 @router.get("/about")
 async def get_about_settings():
-    settings = await settings_collection.find_one({"key": "about"})
-    if settings:
-        return settings.get(
-            "data",
-            {
-                "experience_years": 10,
-                "mission": "Our mission is to make quality tailoring education accessible to everyone.",
-                "about_text": "We are dedicated to preserving traditional tailoring skills while embracing modern techniques.",
-            },
-        )
+    try:
+        settings = await settings_collection.find_one({"key": "about"})
+        if settings:
+            return settings.get("data", {})
+    except Exception as e:
+        print(f"Error fetching about: {e}")
     return {
         "experience_years": 10,
         "mission": "Our mission is to make quality tailoring education accessible to everyone.",
         "about_text": "We are dedicated to preserving traditional tailoring skills while embracing modern techniques.",
     }
+
+
+@router.get("/contact")
+async def get_contact_settings():
+    try:
+        settings = await settings_collection.find_one({"key": "contact"})
+        if settings:
+            return settings.get("data", {})
+    except Exception as e:
+        print(f"Error fetching contact: {e}")
+    return {
+        "phone": "",
+        "email": "",
+        "address": "",
+        "whatsapp": "",
+        "instagram": "",
+        "facebook": "",
+    }
+
+
+@router.get("/stats")
+async def get_stats():
+    try:
+        total_students = await users_collection.count_documents({})
+        total_courses = await courses_collection.count_documents({})
+        total_products = await products_collection.count_documents({})
+        total_orders = await orders_collection.count_documents({"status": "completed"})
+
+        return {
+            "students": round_students(total_students),
+            "courses": total_courses,
+            "products": total_products,
+            "orders": total_orders,
+        }
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
+        return {
+            "students": "0",
+            "courses": 0,
+            "products": 0,
+            "orders": 0,
+        }
 
 
 @router.put("/about")

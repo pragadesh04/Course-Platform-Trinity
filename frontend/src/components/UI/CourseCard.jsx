@@ -78,7 +78,6 @@ export default function CourseCard({ course }) {
 
         <div className="course-content">
           <h3 className="course-title">{course.title}</h3>
-          <p className="course-description">{course.description}</p>
           
           <div className="course-meta">
             <span className="meta-item">

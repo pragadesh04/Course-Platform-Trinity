@@ -44,7 +44,8 @@ export default function Navbar() {
   const fetchUnreadCount = async () => {
     try {
       const token = localStorage.getItem('course_better_token');
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/notifications/unread-count`, {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const res = await fetch(`${baseUrl}/notifications/unread-count`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
