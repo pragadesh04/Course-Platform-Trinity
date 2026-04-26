@@ -220,13 +220,16 @@ export default function CourseDetail() {
 
   return (
     <div className="course-detail-page">
-      <div className="course-hero">
+      <div 
+        className="course-hero"
+        style={course.thumbnail_url ? { backgroundImage: `url(${course.thumbnail_url})` } : {}}
+      >
+        <div className="course-hero-overlay" />
         <div className="container">
           <div className="course-hero-content">
             <div className="course-hero-info">
               <span className="course-category">{course.category_name}</span>
               <h1>{course.title}</h1>
-              <p className="course-description">{course.description}</p>
               
               <div className="course-meta">
                 <span><Play size={16} /> {course.sessions || 0} Sessions</span>
@@ -239,14 +242,6 @@ export default function CourseDetail() {
                   </>
                 )}
               </div>
-            </div>
-
-            <div className="course-hero-thumbnail">
-              <Image 
-                src={course.thumbnail_url} 
-                alt={course.title}
-                fallback="https://placehold.co/400x250/D4AF37/1A1A1A?text=Course"
-              />
             </div>
           </div>
         </div>
