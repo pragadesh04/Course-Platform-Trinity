@@ -294,6 +294,17 @@ async def extract_metadata(urls: List[str]):
     return {"metadata": metadata}
 
 
+@router.post("/generate-ai-content")
+async def generate_ai_content(
+    payload: List[dict], admin: UserResponse = Depends(get_admin_user)
+):
+    try:
+        content = await course_ai.generate_course_content_from_sessions(payload)
+        return content
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/ai/generate-title")
 async def enhance_course_title(
     payload: dict, admin: UserResponse = Depends(get_admin_user)

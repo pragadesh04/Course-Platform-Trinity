@@ -282,6 +282,30 @@ input::placeholder, textarea::placeholder {
     color: var(--text-secondary);
 }
 
+/* ==================== INPUT WITH ICON UTILITY ==================== */
+/* Used in Login, Register, Profile, and any form with a leading icon */
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-icon svg {
+    position: absolute;
+    left: 16px;
+    color: var(--stardust);
+    pointer-events: none;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.input-icon input,
+.input-icon .input {
+    width: 100%;
+    padding-left: 48px !important;
+}
+
 /* ==================== COSMIC ANIMATIONS ==================== */
 
 @keyframes twinkle {
