@@ -360,28 +360,29 @@ function CoursesContent() {
                     </button>
                 </div>
             ) : (
-                <div className="data-table">
+                <div className="data-table data-scrollable">
                     <table>
                         <thead>
                             <tr>
                                 <th>Title</th>
                                 <th>Sessions</th>
                                 <th>Prices</th>
-                                <th>Featured</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {courses.map((course) => (
                                 <tr key={course.id}>
-                                    <td data-label="Title">{course.title}</td>
+                                    <td data-label="Title">
+                                        <div className="name-cell">
+                                            <span className="name-main">{course.title}</span>
+                                            <span className="name-slug">{course.sessions || 0} sessions</span>
+                                        </div>
+                                    </td>
                                     <td data-label="Sessions">{course.sessions || 0}</td>
                                     <td data-label="Prices">
-                                        3M: ₹{course.prices?.m3 || 0} |
-                                        6M: ₹{course.prices?.m6 || 0} |
-                                        LT: ₹{course.prices?.lifetime || 0}
+                                        <span className="price-cell">₹{course.prices?.m3 || 0}</span>
                                     </td>
-                                    <td data-label="Featured">{course.featured ? 'Yes' : 'No'}</td>
                                     <td data-label="Actions">
                                         <div className="action-buttons">
                                             <button className="action-btn edit" onClick={() => navigate(`/admin/courses/${course.id}/edit`)}>
@@ -839,13 +840,12 @@ function ProductsContent() {
                     </button>
                 </div>
             ) : (
-                <div className="data-table">
+                <div className="data-table data-scrollable">
                     <table>
                         <thead>
                             <tr>
                                 <th>Title</th>
                                 <th>Price</th>
-                                <th>Features</th>
                                 <th>Featured</th>
                                 <th>Actions</th>
                             </tr>
@@ -853,9 +853,13 @@ function ProductsContent() {
                         <tbody>
                             {products.map((product) => (
                                 <tr key={product.id}>
-                                    <td data-label="Title">{product.title}</td>
+                                    <td data-label="Title">
+                                        <div className="name-cell">
+                                            <span className="name-main">{product.title}</span>
+                                            <span className="name-slug">{product.tags?.[0] || '—'}</span>
+                                        </div>
+                                    </td>
                                     <td data-label="Price">₹{product.price}</td>
-                                    <td data-label="Features">{product.key_features?.length || 0}</td>
                                     <td data-label="Featured">{product.featured ? 'Yes' : 'No'}</td>
                                     <td data-label="Actions">
                                         <div className="action-buttons">
@@ -936,12 +940,11 @@ function CategoriesContent() {
                     </button>
                 </div>
             ) : (
-                <div className="data-table">
+                <div className="data-table data-scrollable">
                     <table>
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Slug</th>
                                 <th>Type</th>
                                 <th>Actions</th>
                             </tr>
@@ -949,8 +952,12 @@ function CategoriesContent() {
                         <tbody>
                             {categories.map((category) => (
                                 <tr key={category.id}>
-                                    <td data-label="Name">{category.name}</td>
-                                    <td data-label="Slug">{category.slug}</td>
+                                    <td data-label="Name">
+                                        <div className="name-cell">
+                                            <span className="name-main">{category.name}</span>
+                                            <span className="name-slug">{category.slug}</span>
+                                        </div>
+                                    </td>
                                     <td data-label="Type" className="capitalize">{category.type}</td>
                                     <td data-label="Actions">
                                         <div className="action-buttons">
@@ -1096,14 +1103,12 @@ function OrdersContent() {
                     <p>Orders will appear here when customers make purchases</p>
                 </div>
             ) : (
-                <div className="data-table">
+                <div className="data-table data-orders">
                     <table>
                         <thead>
                             <tr>
                                 <th>Order ID</th>
-                                <th>Items</th>
                                 <th>Total</th>
-                                <th>Payment</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
@@ -1111,10 +1116,13 @@ function OrdersContent() {
                         <tbody>
                             {orders.map((order) => (
                                 <tr key={order.id}>
-                                    <td data-label="Order ID">{order.id.slice(-8)}</td>
-                                    <td data-label="Items">{order.items.length} item(s)</td>
+                                    <td data-label="Order ID">
+                                        <div className="name-cell">
+                                            <span className="name-main">#{order.id.slice(-8)}</span>
+                                            <span className="name-slug">{order.items.length} item(s)</span>
+                                        </div>
+                                    </td>
                                     <td data-label="Total">₹{order.total}</td>
-                                    <td data-label="Payment" className="capitalize">{order.payment_method}</td>
                                     <td data-label="Status">
                                         <span className={`status-badge ${order.status}`}>{order.status}</span>
                                     </td>
