@@ -6,3 +6,6 @@ __pycache__
 venv314
 markdowns
 heroPage.png
+.agent
+docs
+design-system

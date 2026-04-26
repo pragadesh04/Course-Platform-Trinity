@@ -1,24 +1,27 @@
 .about-page {
   padding-top: 72px;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, var(--space-deep), var(--space-black));
 }
 
 .about-hero {
-  background: linear-gradient(135deg, var(--color-charcoal), #2A2A2A);
+  background: radial-gradient(ellipse at top, var(--space-deep), var(--space-black));
   padding: 80px 0;
   text-align: center;
 }
 
 .about-hero h1 {
   font-size: clamp(32px, 5vw, 48px);
-  color: var(--color-cream);
+  color: var(--starlight);
   margin-bottom: 24px;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  text-shadow: 0 0 30px var(--accent-glow);
 }
 
 .about-hero p {
-  color: var(--color-gray-400);
+  color: var(--stardust);
   font-size: 18px;
   max-width: 600px;
   margin: 0 auto;
@@ -26,7 +29,7 @@
 }
 
 .about-stats {
-  background: var(--color-cream);
+  background: var(--space-black);
 }
 
 .stats-grid {
@@ -38,26 +41,36 @@
 .stat-item {
   text-align: center;
   padding: 32px;
-  background: var(--color-white);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px -20px var(--accent-glow);
+  border-color: var(--galactic-violet);
 }
 
 .stat-icon {
-  color: var(--color-gold);
+  color: var(--galactic-violet);
   margin-bottom: 16px;
+  filter: drop-shadow(0 0 10px var(--accent-glow));
 }
 
 .stat-value {
   display: block;
   font-size: 36px;
   font-weight: 700;
-  color: var(--color-charcoal);
+  color: var(--starlight);
   margin-bottom: 4px;
 }
 
 .stat-label {
-  color: var(--color-gray-600);
+  color: var(--stardust);
   font-size: 14px;
 }
 
@@ -71,11 +84,11 @@
 .mission-content h2 {
   font-size: 32px;
   margin-bottom: 16px;
-  color: var(--color-charcoal);
+  color: var(--starlight);
 }
 
 .mission-content p {
-  color: var(--color-gray-600);
+  color: var(--stardust);
   margin-bottom: 24px;
   line-height: 1.7;
 }
@@ -88,7 +101,7 @@
   position: relative;
   padding-left: 24px;
   margin-bottom: 12px;
-  color: var(--color-gray-600);
+  color: var(--stardust);
 }
 
 .mission-list li::before {
@@ -98,14 +111,16 @@
   top: 8px;
   width: 8px;
   height: 8px;
-  background: var(--color-gold);
+  background: var(--galactic-violet);
   border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .mission-image img {
   width: 100%;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 20px 60px -20px var(--accent-glow);
+  border: 1px solid var(--glass-border);
 }
 
 @media (max-width: 1024px) {

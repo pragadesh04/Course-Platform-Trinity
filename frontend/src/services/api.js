@@ -100,6 +100,9 @@ export const courseService = {
   delete: (id) => api.delete(`/courses/${id}`),
   getProgress: (courseId) => api.get(`/courses/${courseId}/progress`),
   saveProgress: (courseId, data) => api.post(`/courses/${courseId}/progress`, data),
+  generateTitle: (title) => api.post('/courses/ai/generate-title', { title }),
+  generateDescription: (title) => api.post('/courses/ai/generate-description', { title }),
+  generateLearnings: (title, description) => api.post('/courses/ai/generate-details', { title, description }),
 };
 
 export const productService = {
@@ -111,6 +114,10 @@ export const productService = {
   create: (data) => api.post('/products', data),
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
+  generateTitle: (title) => api.post('/products/ai/generate-title', { title }),
+  generateDescription: (title) => api.post('/products/ai/generate-description', { title }),
+  generateFeatures: (title, description) => api.post('/products/ai/generate-features', { title, description }),
+  generateTags: (title, description) => api.post('/products/ai/generate-tags', { title, description }),
 };
 
 export const orderService = {

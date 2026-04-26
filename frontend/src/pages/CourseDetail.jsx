@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart, Zap, Award, DollarSign, Calendar } from 'lucide-react';
+import { Play, Clock, Users, BookOpen, CheckCircle, ChevronDown, ChevronUp, ShoppingCart, Zap, Award, DollarSign, Calendar, MessageCircle } from 'lucide-react';
 import { courseService, orderService, settingsService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config';
 import Image from '../components/UI/Image';
-import SessionComments from '../components/UI/SessionComments';
 import FeedbackForm from '../components/UI/FeedbackForm';
 import PaymentModal from '../components/UI/PaymentModal';
 import Certificate from '../components/UI/Certificate';
@@ -33,12 +32,27 @@ export default function CourseDetail() {
   const [courseProgress, setCourseProgress] = useState([]);
   const [stats, setStats] = useState({ students: 0, courses: 0, experience_years: 10 });
   const [showCertificate, setShowCertificate] = useState(false);
+  const [expandedSession, setExpandedSession] = useState(null);
+  const [activeTab, setActiveTab] = useState('description');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   useEffect(() => {
     fetchCourse();
     fetchStats();
+    fetchSettings();
     if (user) fetchEnrolledCourses();
   }, [id, user]);
+
+  const fetchSettings = async () => {
+    try {
+      const data = await settingsService.getContact();
+      if (data && data.whatsapp) {
+        setWhatsappNumber(data.whatsapp.replace(/\D/g, ''));
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -241,33 +255,58 @@ export default function CourseDetail() {
       <div className="container">
         <div className="course-content-grid">
           <div className="course-main">
-            {course.what_you_will_learn?.length > 0 && (
-              <section className="course-section">
-                <h2><Award size={20} /> What You'll Learn</h2>
-                <ul className="what-you-will-learn-list">
-                  {course.what_you_will_learn.map((item, index) => (
-                    <li key={index}>
-                      <CheckCircle size={18} />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <div className="detail-tabs">
+              <button 
+                className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
+                onClick={() => setActiveTab('description')}
+              >
+                Description
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === 'details' ? 'active' : ''}`}
+                onClick={() => setActiveTab('details')}
+              >
+                Course Details
+              </button>
+            </div>
 
-            {course.prerequisites?.length > 0 && (
-              <section className="course-section">
-                <h2><DollarSign size={20} /> Prerequisites</h2>
-                <ul className="prerequisites-list">
-                  {course.prerequisites.map((item, index) => (
-                    <li key={index}>
-                      <CheckCircle size={18} />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            <div className="tab-content">
+              {activeTab === 'description' ? (
+                <section className="course-section">
+                  <p className="course-description-full">{course.description}</p>
+                </section>
+              ) : (
+                <>
+                  {course.what_you_will_learn?.length > 0 && (
+                    <section className="course-section">
+                      <h2><Award size={20} /> What You'll Learn</h2>
+                      <ul className="what-you-will-learn-list">
+                        {course.what_you_will_learn.map((item, index) => (
+                          <li key={index}>
+                            <CheckCircle size={18} />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {course.prerequisites?.length > 0 && (
+                    <section className="course-section">
+                      <h2><DollarSign size={20} /> Prerequisites</h2>
+                      <ul className="prerequisites-list">
+                        {course.prerequisites.map((item, index) => (
+                          <li key={index}>
+                            <CheckCircle size={18} />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+                </>
+              )}
+            </div>
 
             {course.instructor_info?.name && (
               <section className="course-section">
@@ -302,50 +341,47 @@ export default function CourseDetail() {
             )}
 
             <section className="course-section">
-              <h2><BookOpen size={20} /> Course Sessions</h2>
+              <h2><BookOpen size={20} /> Course Sessions ({course.sessions_list?.length || 0})</h2>
               <div className="sessions-list">
                 {course.sessions_list?.map((session, index) => {
                   const canAccess = isEnrolled || session.is_free;
                   const progressEntry = courseProgress.find(p => p.session_idx === index);
                   const isCompleted = progressEntry?.completed;
+                  const isExpanded = expandedSession === index;
                   return (
-                  <div key={index} className={`session-item ${isCompleted ? 'completed' : ''}`}>
-                    <div className="session-header">
-                      <span className="session-number">Session {index + 1}</span>
-                      {session.is_free && <span className="free-preview-badge">Free Preview</span>}
-                      {isEnrolled && isCompleted && <span className="completed-badge"><CheckCircle size={12} /></span>}
-                      <span className="session-title">{session.title}</span>
-                      <span className="session-duration">{formatDuration(session.duration)}</span>
-                    </div>
-                    <div className="session-content">
-                      <p>{session.description}</p>
-                      {session.is_free ? (
-                        <button 
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleWatchFree(index)}
-                        >
-                          <Play size={16} /> Watch Preview
-                        </button>
-                      ) : canAccess ? (
-                        <button 
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleWatchFree(index)}
-                        >
-                          <Play size={16} /> Watch Video
-                        </button>
-                      ) : (
-                        <div className="session-locked">
-                          <p>Enroll to access this video</p>
+                    <div key={index} className={`session-item ${isCompleted ? 'completed' : ''} ${isExpanded ? 'expanded' : ''}`}>
+                      <button 
+                        className="session-header"
+                        onClick={() => setExpandedSession(isExpanded ? null : index)}
+                      >
+                        <span className="session-number">{isCompleted ? <CheckCircle size={14} /> : index + 1}</span>
+                        <span className="session-title">{session.title}</span>
+                        <span className="session-duration">{formatDuration(session.duration)}</span>
+                      </button>
+                      {isExpanded && (
+                        <div className="session-content">
+                          <p>{session.description}</p>
+                          {session.is_free ? (
+                            <button 
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleWatchFree(index)}
+                            >
+                              <Play size={16} /> Watch Preview
+                            </button>
+                          ) : canAccess ? (
+                            <button 
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleWatchFree(index)}
+                            >
+                              <Play size={16} /> Watch Video
+                            </button>
+                          ) : (
+                            <div className="session-locked">
+                              <p>Enroll to access this video</p>
+                            </div>
+                          )}
                         </div>
                       )}
-                      <div className="session-comments-section">
-                        <SessionComments 
-                          courseId={id} 
-                          sessionIndex={index}
-                          isEnrolled={isEnrolled}
-                        />
-                      </div>
-                      </div>
                     </div>
                   );
                 })}
@@ -457,6 +493,16 @@ export default function CourseDetail() {
                     <ShoppingCart size={18} />
                     Enroll Now
                   </button>
+
+                  <a 
+                    href={`https://wa.me/${whatsappNumber || '91XXXXXXXXXX'}?text=${encodeURIComponent(`I would like to know more about ${course.title}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="whatsapp-btn-full"
+                  >
+                    <MessageCircle size={20} />
+                    Contact on WhatsApp
+                  </a>
                 </>
               )}
             </div>

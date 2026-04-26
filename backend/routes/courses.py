@@ -13,6 +13,7 @@ from schemas import (
     UserProgressResponse,
 )
 from auth import get_admin_user, get_current_user
+from utils.ai import course_ai
 
 router = APIRouter(prefix="/courses", tags=["Courses"])
 
@@ -67,10 +68,10 @@ def course_helper(course, include_sessions: bool = False) -> dict:
         "sessions": len(video_links),
         "duration": total_duration,
         "session_titles": session_titles,
-        "category_id": course.get("category_id"),
+        "category_ids": course.get("category_ids", []),
         "featured": course.get("featured", False),
         "created_at": course["created_at"],
-        "category_name": "",
+        "category_names": [],
         "sessions_list": sessions_list,
         "is_first_session_free": is_first_session_free,
         "is_free": is_free,
@@ -92,15 +93,26 @@ async def get_category_name(category_id: str) -> str:
         return ""
 
 
+async def get_category_names(category_ids: List[str]) -> List[str]:
+    names = []
+    for cat_id in category_ids:
+        name = await get_category_name(cat_id)
+        if name:
+            names.append(name)
+    return names
+
+
 @router.get("", response_model=List[CourseResponse])
 async def get_courses(
-    category_id: Optional[str] = None,
+    category_ids: Optional[str] = None,
     featured: Optional[bool] = None,
     search: Optional[str] = None,
 ):
     query = {}
-    if category_id:
-        query["category_id"] = category_id
+    if category_ids:
+        cat_ids = [c.strip() for c in category_ids.split(",") if c.strip()]
+        if cat_ids:
+            query["category_ids"] = {"$in": cat_ids}
     if featured is not None:
         query["featured"] = featured
     if search:
@@ -109,8 +121,8 @@ async def get_courses(
     courses = []
     async for course in courses_collection.find(query).sort("created_at", -1):
         course_data = course_helper(course)
-        course_data["category_name"] = await get_category_name(
-            course.get("category_id")
+        course_data["category_names"] = await get_category_names(
+            course.get("category_ids", [])
         )
         courses.append(course_data)
     return courses
@@ -123,7 +135,7 @@ async def get_course(course_id: str):
         raise HTTPException(status_code=404, detail="Course not found")
 
     course_data = course_helper(course, include_sessions=True)
-    course_data["category_name"] = await get_category_name(course.get("category_id"))
+    course_data["category_names"] = await get_category_names(course.get("category_ids", []))
     return course_data
 
 
@@ -152,7 +164,7 @@ async def create_course(
         "duration": total_duration,
         "session_durations": session_durations,
         "session_titles": session_titles,
-        "category_id": course_data.category_id,
+        "category_ids": course_data.category_ids or [],
         "featured": course_data.featured,
         "is_first_session_free": course_data.is_first_session_free,
         "is_free": course_data.is_free,
@@ -169,7 +181,7 @@ async def create_course(
     course_doc["_id"] = result.inserted_id
 
     response = course_helper(course_doc)
-    response["category_name"] = await get_category_name(course_data.category_id)
+    response["category_names"] = await get_category_names(course_data.category_ids or [])
     return response
 
 
@@ -262,7 +274,7 @@ async def update_course(
                 await notifications_collection.insert_many(notifications)
 
     response = course_helper(updated)
-    response["category_name"] = await get_category_name(updated.get("category_id"))
+    response["category_names"] = await get_category_names(updated.get("category_ids", []))
     return response
 
 
@@ -282,17 +294,50 @@ async def extract_metadata(urls: List[str]):
     return {"metadata": metadata}
 
 
-@router.post("/generate-ai-content")
-async def generate_ai_content(sessions: List[dict]):
-    from services.ai import generate_course_metadata
+@router.post("/ai/generate-title")
+async def enhance_course_title(
+    payload: dict, admin: UserResponse = Depends(get_admin_user)
+):
+    title = payload.get("title")
+    if not title:
+        raise HTTPException(status_code=400, detail="Title is required")
+    
+    try:
+        enhanced = await course_ai.generate_course_title(title)
+        return {"title": enhanced}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    result = generate_course_metadata(sessions)
-    if result is None:
-        raise HTTPException(
-            status_code=503,
-            detail="AI service unavailable. Please ensure MISTRAL_API_KEY is configured."
-        )
-    return result
+
+@router.post("/ai/generate-description")
+async def generate_course_description(
+    payload: dict, admin: UserResponse = Depends(get_admin_user)
+):
+    title = payload.get("title")
+    if not title:
+        raise HTTPException(status_code=400, detail="Title is required")
+    
+    try:
+        description = await course_ai.generate_course_description(title)
+        return {"description": description}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/ai/generate-details")
+async def generate_course_learnings(
+    payload: dict, admin: UserResponse = Depends(get_admin_user)
+):
+    title = payload.get("title")
+    description = payload.get("description")
+    if not title or not description:
+        raise HTTPException(status_code=400, detail="Title and Description are required")
+    
+    try:
+        learnings = await course_ai.generate_course_learnings(title, description)
+        return {"learnings": learnings}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{course_id}/progress", response_model=List[UserProgressResponse])

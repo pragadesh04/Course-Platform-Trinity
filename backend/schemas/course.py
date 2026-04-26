@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -32,7 +32,7 @@ class CourseBase(BaseModel):
     video_links: list = []
     session_durations: list = []
     session_titles: list = []
-    category_id: Optional[str] = None
+    category_ids: List[str] = []
     featured: bool = False
     is_first_session_free: bool = False
     is_free: bool = False
@@ -53,10 +53,10 @@ class CourseUpdate(BaseModel):
     video_links: Optional[list] = None
     session_durations: Optional[list] = None
     session_titles: Optional[list] = None
-    category_id: Optional[str] = None
+    category_ids: Optional[List[str]] = None
     featured: Optional[bool] = None
     is_first_session_free: Optional[bool] = None
-    is_free: Optional[bool] = None
+    is_free: bool = False
     what_you_will_learn: Optional[list] = None
     prerequisites: Optional[list] = None
     instructor_info: Optional[InstructorInfo] = None
@@ -67,7 +67,7 @@ class CourseResponse(CourseBase):
     sessions: int = 0
     duration: float = 0
     created_at: datetime
-    category_name: str = ""
+    category_names: List[str] = []
     sessions_list: list = []
 
     class Config:

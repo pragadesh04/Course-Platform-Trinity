@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Image from './Image';
 import './CourseCard.css';
 
-const COURSE_PLACEHOLDER = 'https://placehold.co/600x400/D4AF37/1A1A1A?text=Course';
+const COURSE_PLACEHOLDER = 'https://placehold.co/600x400/8a2be2/05010d?text=Course';
 
 export default function CourseCard({ course }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -27,7 +27,6 @@ export default function CourseCard({ course }) {
   };
   
   const lowestPrice = getLowestPrice();
-
   const thumbnailSrc = course.thumbnail_url || COURSE_PLACEHOLDER;
 
   const handleMouseMove = (e) => {
@@ -38,10 +37,7 @@ export default function CourseCard({ course }) {
     mouseY.set(y * 10);
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-
+  const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => {
     setIsHovered(false);
     mouseX.set(0);
@@ -52,72 +48,68 @@ export default function CourseCard({ course }) {
   const rotateY = useMotionTemplate`${-mouseX}deg`;
 
   return (
-    <motion.div
-      className="course-card"
-      style={{
-        transformStyle: 'preserve-3d',
-        rotateX,
-        rotateY,
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="card-shine" style={{ opacity: isHovered ? 1 : 0 }} />
-      <div className="course-thumbnail">
-        <Image 
-          src={thumbnailSrc} 
-          alt={course.title}
-          fallback={COURSE_PLACEHOLDER}
-        />
-        <div className="course-sessions">
-          {course.sessions || 0} Sessions
-        </div>
-      </div>
-
-      <div className="course-content">
-        <h3 className="course-title">{course.title}</h3>
-        <p className="course-description">{course.description}</p>
-        
-        <div className="course-meta">
-          <span className="meta-item">
-            <Play size={14} />
-            {course.sessions || 0} Videos
-          </span>
-          <span className="meta-item">
-            <Clock size={14} />
-            {(() => {
-              const mins = course.duration || 0;
-              const hrs = Math.floor(mins / 60);
-              const m = Math.round(mins % 60);
-              if (hrs === 0) return `${m} min`;
-              if (m === 0) return `${hrs} hr`;
-              return `${hrs} hr ${m} min`;
-            })()}
-          </span>
+    <Link to={`/courses/${course.id}`} className="course-card-link">
+      <motion.div
+        className={`course-card ${course.featured ? 'featured' : ''} ${course.is_free ? 'free' : ''}`}
+        style={{
+          transformStyle: 'preserve-3d',
+          rotateX,
+          rotateY,
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        whileHover={{ y: -12 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="card-shine" style={{ opacity: isHovered ? 1 : 0 }} />
+        <div className="course-thumbnail-container">
+          <div className="thumbnail-blur-bg" style={{ backgroundImage: `url(${thumbnailSrc})` }} />
+          <Image 
+            src={thumbnailSrc} 
+            alt={course.title}
+            className="thumbnail-main-img"
+            fallback={COURSE_PLACEHOLDER}
+          />
+          <div className="course-sessions">
+            {course.sessions || 0} Sessions
+          </div>
         </div>
 
-        <div className="course-footer">
-          <motion.div 
-            className="course-price"
-            animate={{ y: isHovered ? -4 : 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <span className="price-label">Starting at</span>
-            <span className="price-value">{formatPrice(lowestPrice)}</span>
-          </motion.div>
-          <motion.div
-            animate={{ y: isHovered ? 0 : 20, opacity: isHovered ? 1 : 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <Link to={`/courses/${course.id}`} className="btn btn-primary btn-sm">
-              View Course
-            </Link>
-          </motion.div>
+        <div className="course-content">
+          <h3 className="course-title">{course.title}</h3>
+          <p className="course-description">{course.description}</p>
+          
+          <div className="course-meta">
+            <span className="meta-item">
+              <Play size={14} />
+              {course.sessions || 0} Videos
+            </span>
+            <span className="meta-item">
+              <Clock size={14} />
+              {(() => {
+                const mins = course.duration || 0;
+                const hrs = Math.floor(mins / 60);
+                const m = Math.round(mins % 60);
+                if (hrs === 0) return `${m} min`;
+                if (m === 0) return `${hrs} hr`;
+                return `${hrs} hr ${m} min`;
+              })()}
+            </span>
+          </div>
+
+          <div className="course-footer">
+            <motion.div 
+              className="course-price"
+              animate={{ y: isHovered ? -4 : 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              <span className="price-label">Starting at</span>
+              <span className="price-value">{formatPrice(lowestPrice)}</span>
+            </motion.div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }

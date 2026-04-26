@@ -11,8 +11,17 @@ export default function Navbar() {
   const [cartCount, setCartCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const updateCartCount = () => {
@@ -58,7 +67,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
           <span className="logo-text">Trinity</span>

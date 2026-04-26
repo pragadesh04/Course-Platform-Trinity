@@ -12,7 +12,9 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
             &times;
           </button>
         </div>
-        <div className="modal-content">{children}</div>
+        <div className="modal-content">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     LayoutDashboard,
@@ -25,8 +25,6 @@ import {
     Clock,
     UserPlus,
     Key,
-    Bell,
-    Search,
     LogOut,
     ChevronDown,
 } from 'lucide-react';
@@ -48,7 +46,14 @@ export default function Admin() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isBulkAccessModalOpen, setIsBulkAccessModalOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const mainRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
@@ -83,13 +88,6 @@ export default function Admin() {
                     <h2>Admin Panel</h2>
                 </div>
                 <div className="admin-header-right">
-                    <button className="header-btn">
-                        <Search size={20} />
-                    </button>
-                    <button className="header-btn">
-                        <Bell size={20} />
-                        <span className="notification-badge">3</span>
-                    </button>
                     <div className="admin-user">
                         <div className="user-avatar">
                             {user?.name?.charAt(0) || 'A'}
@@ -111,20 +109,21 @@ export default function Admin() {
                             key={tab.id}
                             className={`sidebar-link ${activeTab === tab.id ? 'active' : ''}`}
                             onClick={() => handleTabChange(tab.id)}
+                            data-label={tab.label}
                         >
                             <tab.icon size={20} />
-                            {tab.label}
+                            <span className="sidebar-label">{tab.label}</span>
                         </button>
                     ))}
                 </nav>
                 <div className="sidebar-footer">
-                    <Link to="/" className="sidebar-link">
+                    <Link to="/" className="sidebar-link" data-label="View Site">
                         <Eye size={20} />
-                        View Site
+                        <span className="sidebar-label">View Site</span>
                     </Link>
-                    <button className="sidebar-link" onClick={() => {}}>
+                    <button className="sidebar-link" data-label="Logout" onClick={() => {}}>
                         <LogOut size={20} />
-                        Logout
+                        <span className="sidebar-label">Logout</span>
                     </button>
                 </div>
             </aside>
@@ -145,6 +144,28 @@ export default function Admin() {
                     <p>&copy; 2026 Trinity. All rights reserved.</p>
                 </footer>
             </main>
+
+            {isMobile && (
+            <nav className="mobile-bottom-nav">
+                {mobileTabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        className={`mobile-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => handleTabChange(tab.id)}
+                    >
+                        <tab.icon size={20} />
+                        <span>{tab.label}</span>
+                    </button>
+                ))}
+                <button
+                    className="mobile-nav-btn"
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                >
+                    <MoreHorizontal size={20} />
+                    <span>More</span>
+                </button>
+            </nav>
+            )}
 
             <motion.button
                 className="fab-button"
@@ -286,8 +307,7 @@ function DashboardContent() {
 function CoursesContent() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
-    const [editingCourse, setEditingCourse] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchCourses();
@@ -315,16 +335,11 @@ function CoursesContent() {
         }
     }
 
-    function openEdit(course) {
-        setEditingCourse(course);
-        setShowModal(true);
-    }
-
     return (
         <div className="admin-content">
             <div className="content-header">
                 <h1>Courses</h1>
-                <button className="btn btn-primary" onClick={() => { setEditingCourse(null); setShowModal(true); }}>
+                <button className="btn btn-primary" onClick={() => navigate('/admin/courses/new')}>
                     <Plus size={18} />
                     Add Course
                 </button>
@@ -339,7 +354,7 @@ function CoursesContent() {
                     </div>
                     <h3>No Courses Yet</h3>
                     <p>Create your first course to get started</p>
-                    <button className="btn btn-primary" onClick={() => { setEditingCourse(null); setShowModal(true); }}>
+                    <button className="btn btn-primary" onClick={() => navigate('/admin/courses/new')}>
                         <Plus size={18} />
                         Add Course
                     </button>
@@ -369,7 +384,7 @@ function CoursesContent() {
                                     <td data-label="Featured">{course.featured ? 'Yes' : 'No'}</td>
                                     <td data-label="Actions">
                                         <div className="action-buttons">
-                                            <button className="action-btn edit" onClick={() => openEdit(course)}>
+                                            <button className="action-btn edit" onClick={() => navigate(`/admin/courses/${course.id}/edit`)}>
                                                 <Edit2 size={16} />
                                             </button>
                                             <button className="action-btn delete" onClick={() => handleDelete(course.id)}>
@@ -383,24 +398,12 @@ function CoursesContent() {
                     </table>
                 </div>
             )}
-
-            <Modal
-                isOpen={showModal}
-                onClose={() => { setShowModal(false); setEditingCourse(null); }}
-                title={editingCourse ? 'Edit Course' : 'Add Course'}
-                size="lg"
-            >
-                <CourseForm
-                    course={editingCourse}
-                    onClose={() => { setShowModal(false); setEditingCourse(null); }}
-                    onSave={fetchCourses}
-                />
-            </Modal>
         </div>
     );
 }
 
 function CourseForm({ course, onClose, onSave }) {
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         title: course?.title || '',
         description: course?.description || '',
@@ -418,6 +421,7 @@ function CourseForm({ course, onClose, onSave }) {
         is_free: course?.prices?.m3 === 0 && course?.prices?.m6 === 0 && course?.prices?.lifetime === 0,
         what_you_will_learn: course?.what_you_will_learn?.join('\n') || '',
         prerequisites: course?.prerequisites?.join('\n') || '',
+        category_ids: course?.category_ids || [],
         instructor_info: {
             name: course?.instructor_info?.name || '',
             bio: course?.instructor_info?.bio || '',
@@ -427,6 +431,18 @@ function CourseForm({ course, onClose, onSave }) {
     });
     const [saving, setSaving] = useState(false);
     const [fetchingMetadata, setFetchingMetadata] = useState(false);
+
+    useEffect(() => {
+        async function fetchCategories() {
+            try {
+                const data = await categoryService.getAll('course');
+                setCategories(data);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        }
+        fetchCategories();
+    }, []);
 
     const fetchMetadata = async () => {
         const videoLinks = formData.video_links.split('\n').filter(url => url.trim());
@@ -528,6 +544,7 @@ function CourseForm({ course, onClose, onSave }) {
                 is_free: formData.is_free,
                 what_you_will_learn: formData.what_you_will_learn.split('\n').filter(t => t.trim()),
                 prerequisites: formData.prerequisites.split('\n').filter(t => t.trim()),
+                category_ids: formData.category_ids,
                 instructor_info: {
                     name: formData.instructor_info.name,
                     bio: formData.instructor_info.bio,
@@ -713,60 +730,63 @@ function CourseForm({ course, onClose, onSave }) {
                     onChange={(e) => setFormData({ ...formData, prerequisites: e.target.value })}
                 />
             </div>
-            <fieldset className="form-fieldset">
-                <legend>Instructor Information</legend>
-                <div className="form-group">
-                    <label>Instructor Name</label>
-                    <input
-                        type="text"
-                        className="input"
-                        value={formData.instructor_info.name}
-                        onChange={(e) => setFormData({
-                            ...formData,
-                            instructor_info: { ...formData.instructor_info, name: e.target.value }
-                        })}
-                    />
+            <div className="form-group">
+                <label>Categories</label>
+                <div className="multi-category-select">
+                    {formData.category_ids.map((catId, index) => (
+                        <div key={index} className="category-select-row">
+                            <select
+                                className="input"
+                                value={catId}
+                                onChange={(e) => {
+                                    const newIds = [...formData.category_ids];
+                                    newIds[index] = e.target.value;
+                                    setFormData({ ...formData, category_ids: newIds });
+                                }}
+                            >
+                                <option value="">Select category...</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                    setFormData({
+                                        ...formData,
+                                        category_ids: formData.category_ids.filter((_, i) => i !== index),
+                                    });
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                            setFormData({
+                                ...formData,
+                                category_ids: [...formData.category_ids, ''],
+                            });
+                        }}
+                    >
+                        + Add Category
+                    </button>
                 </div>
-                <div className="form-group">
-                    <label>Instructor Bio</label>
-                    <textarea
-                        className="input"
-                        rows={3}
-                        value={formData.instructor_info.bio}
-                        onChange={(e) => setFormData({
-                            ...formData,
-                            instructor_info: { ...formData.instructor_info, bio: e.target.value }
-                        })}
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Instructor Photo URL</label>
-                    <ImageUploader
-                        value={formData.instructor_info.photo_url}
-                        onChange={(url) => setFormData({
-                            ...formData,
-                            instructor_info: { ...formData.instructor_info, photo_url: url }
-                        })}
-                    />
-                </div>
-            </fieldset>
-            <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>
-                    Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Course'}
-                </button>
             </div>
         </form>
     );
 }
 
+// CourseForm now uses dedicated CourseEditor page
+
 function ProductsContent() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchProducts();
@@ -798,7 +818,7 @@ function ProductsContent() {
         <div className="admin-content">
             <div className="content-header">
                 <h1>Products</h1>
-                <button className="btn btn-primary" onClick={() => { setEditingProduct(null); setShowModal(true); }}>
+                <button className="btn btn-primary" onClick={() => navigate('/admin/products/new')}>
                     <Plus size={18} />
                     Add Product
                 </button>
@@ -813,7 +833,7 @@ function ProductsContent() {
                     </div>
                     <h3>No Products Yet</h3>
                     <p>Add your first product to start selling</p>
-                    <button className="btn btn-primary" onClick={() => { setEditingProduct(null); setShowModal(true); }}>
+                    <button className="btn btn-primary" onClick={() => navigate('/admin/products/new')}>
                         <Plus size={18} />
                         Add Product
                     </button>
@@ -839,7 +859,7 @@ function ProductsContent() {
                                     <td data-label="Featured">{product.featured ? 'Yes' : 'No'}</td>
                                     <td data-label="Actions">
                                         <div className="action-buttons">
-                                            <button className="action-btn edit" onClick={() => { setEditingProduct(product); setShowModal(true); }}>
+                                            <button className="action-btn edit" onClick={() => navigate(`/admin/products/${product.id}/edit`)}>
                                                 <Edit2 size={16} />
                                             </button>
                                             <button className="action-btn delete" onClick={() => handleDelete(product.id)}>
@@ -853,139 +873,11 @@ function ProductsContent() {
                     </table>
                 </div>
             )}
-
-            <Modal
-                isOpen={showModal}
-                onClose={() => { setShowModal(false); setEditingProduct(null); }}
-                title={editingProduct ? 'Edit Product' : 'Add Product'}
-                size="lg"
-            >
-                <ProductForm
-                    product={editingProduct}
-                    onClose={() => { setShowModal(false); setEditingProduct(null); }}
-                    onSave={fetchProducts}
-                />
-            </Modal>
         </div>
     );
 }
 
-function ProductForm({ product, onClose, onSave }) {
-    const [formData, setFormData] = useState({
-        title: product?.title || '',
-        description: product?.description || '',
-        price: product?.price || 0,
-        thumbnail_url: product?.thumbnail_url || '',
-        key_features: product?.key_features?.join('\n') || '',
-        tags: product?.tags?.join(', ') || '',
-        featured: product?.featured || false,
-    });
-    const [saving, setSaving] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            const data = {
-                ...formData,
-                price: parseFloat(formData.price) || 0,
-                key_features: formData.key_features.split('\n').filter((f) => f.trim()),
-                tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-            };
-            if (product) {
-                await productService.update(product.id, data);
-            } else {
-                await productService.create(data);
-            }
-            onSave();
-            onClose();
-        } catch (error) {
-            console.error('Failed to save product:', error);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="admin-form">
-            <div className="form-group">
-                <label>Title</label>
-                <input
-                    type="text"
-                    className="input"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                />
-            </div>
-            <div className="form-group">
-                <label>Description</label>
-                <textarea
-                    className="input"
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-            </div>
-            <div className="form-row">
-                <div className="form-group">
-                    <label>Price (₹)</label>
-                    <input
-                        type="number"
-                        className="input"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Thumbnail</label>
-                    <ImageUploader
-                        value={formData.thumbnail_url}
-                        onChange={(url) => setFormData({ ...formData, thumbnail_url: url })}
-                    />
-                </div>
-            </div>
-            <div className="form-group">
-                <label>Key Features (one per line)</label>
-                <textarea
-                    className="input"
-                    rows={4}
-                    value={formData.key_features}
-                    onChange={(e) => setFormData({ ...formData, key_features: e.target.value })}
-                />
-            </div>
-            <div className="form-group">
-                <label>Tags (comma separated)</label>
-                <input
-                    type="text"
-                    className="input"
-                    placeholder="tools, fabric, scissors"
-                    value={formData.tags}
-                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                />
-            </div>
-            <div className="form-group checkbox">
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={formData.featured}
-                        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                    />
-                    Featured Product
-                </label>
-            </div>
-            <div className="form-actions">
-                <button type="button" className="btn btn-secondary" onClick={onClose}>
-                    Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Product'}
-                </button>
-            </div>
-        </form>
-    );
-}
+// ProductForm removed - now uses dedicated ProductEditor page
 
 function CategoriesContent() {
     const [categories, setCategories] = useState([]);

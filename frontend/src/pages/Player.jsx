@@ -3,13 +3,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, ChevronRight, Play, Pause, Maximize, Minimize, 
-  Menu, X, FileText, Download, MessageCircle,
+  Menu, X, FileText, Download, 
   Loader2, AlertCircle, Volume2, VolumeX, CheckCircle,
   SkipForward, PlayCircle, List
 } from 'lucide-react';
 import { courseService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import SessionComments from '../components/UI/SessionComments';
 import './Player.css';
 
 function getVideoType(url) {
@@ -401,7 +400,6 @@ export default function Player() {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: FileText },
     { id: 'resources', label: 'Resources', icon: Download },
-    { id: 'discussion', label: 'Discussion', icon: MessageCircle },
   ];
 
   if (loading) {
@@ -481,9 +479,6 @@ export default function Player() {
         <button className={`player-tab ${activeTab === 'sessions' ? 'active' : ''}`} onClick={() => setActiveTab(activeTab === 'sessions' ? '' : 'sessions')}>
           <List size={18} /> Sessions
         </button>
-        <button className={`player-tab ${activeTab === 'comments' ? 'active' : ''}`} onClick={() => setActiveTab(activeTab === 'comments' ? '' : 'comments')}>
-          <MessageCircle size={18} /> Comments
-        </button>
       </div>
 
       <div className="player-tab-content">
@@ -501,11 +496,6 @@ export default function Player() {
               </button>
               );
             })}
-          </div>
-        )}
-        {activeTab === 'comments' && (
-          <div className="player-comments">
-            <SessionComments courseId={courseId} sessionIndex={currentIndex} isEnrolled={true} />
           </div>
         )}
       </div>

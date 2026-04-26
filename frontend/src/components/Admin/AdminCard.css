@@ -1,12 +1,20 @@
 .admin-card {
-  background: var(--color-white);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 16px;
+  transition: all var(--transition-normal);
+}
+
+.admin-card:hover {
+  border-color: var(--galactic-violet);
+  box-shadow: 0 10px 40px -10px var(--accent-glow);
 }
 
 .admin-card-header {
@@ -21,6 +29,7 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   flex-shrink: 0;
+  border: 1px solid var(--glass-border);
 }
 
 .admin-card-image img {
@@ -37,7 +46,7 @@
 .admin-card-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-charcoal);
+  color: var(--starlight);
   margin: 0;
   line-height: 1.3;
   display: -webkit-box;
@@ -48,7 +57,7 @@
 
 .admin-card-subtitle {
   font-size: 13px;
-  color: var(--color-gray-500);
+  color: var(--stardust);
   margin-top: 4px;
   display: block;
 }
@@ -58,7 +67,7 @@
   flex-direction: column;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-gray-200);
+  border-top: 1px solid var(--glass-border);
 }
 
 .admin-card-detail {
@@ -69,13 +78,13 @@
 
 .detail-label {
   font-size: 13px;
-  color: var(--color-gray-500);
+  color: var(--stardust);
 }
 
 .detail-value {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-charcoal);
+  color: var(--starlight);
 }
 
 .admin-card-prices {
@@ -83,7 +92,7 @@
   flex-wrap: wrap;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-gray-200);
+  border-top: 1px solid var(--glass-border);
 }
 
 .price-item {
@@ -94,19 +103,19 @@
 
 .price-item .price-label {
   font-size: 11px;
-  color: var(--color-gray-500);
+  color: var(--stardust);
   text-transform: uppercase;
 }
 
 .price-item .price-value {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-charcoal);
+  color: var(--galactic-violet);
 }
 
 .admin-card-featured {
   padding-top: 12px;
-  border-top: 1px solid var(--color-gray-200);
+  border-top: 1px solid var(--glass-border);
 }
 
 .featured-badge {
@@ -115,20 +124,23 @@
   border-radius: 50px;
   font-size: 12px;
   font-weight: 500;
-  background: var(--color-gold);
-  color: var(--color-charcoal);
+  background: var(--galactic-violet);
+  color: var(--starlight);
+  box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .featured-badge:not(.featured) {
-  background: var(--color-gray-200);
-  color: var(--color-gray-600);
+  background: var(--glass-bg);
+  color: var(--stardust);
+  border: 1px solid var(--glass-border);
+  box-shadow: none;
 }
 
 .admin-card-actions {
   display: flex;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-gray-200);
+  border-top: 1px solid var(--glass-border);
   margin-top: auto;
 }
 
@@ -149,8 +161,8 @@
 }
 
 .admin-card-btn.edit {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
 .admin-card-btn.edit:hover {
@@ -159,8 +171,8 @@
 }
 
 .admin-card-btn.delete {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
 
 .admin-card-btn.delete:hover {

@@ -123,8 +123,8 @@
 
 .btn-change {
   padding: 8px 16px;
-  background: var(--color-white);
-  color: var(--color-charcoal);
+  background: var(--galactic-violet);
+  color: var(--starlight);
   border: none;
   border-radius: var(--radius-md);
   font-size: 14px;

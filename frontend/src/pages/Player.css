@@ -284,6 +284,31 @@
   overflow-y: auto;
 }
 
+/* ==================== TABLET & SMALL LAPTOP RESPONSIVE (769px - 1024px) ==================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .player-container {
+    flex-direction: row;
+  }
+
+  .player-video-container {
+    width: 70%;
+    height: calc(100vh - 60px);
+    flex-shrink: 0;
+  }
+
+  .player-sidebar {
+    width: 30%;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  .player-nav button {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
 @media (max-width: 768px) {
   .player-video-container {
     width: 100%;

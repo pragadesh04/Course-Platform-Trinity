@@ -6,6 +6,7 @@ import ProductCard from '../components/UI/ProductCard';
 import { AnimatedSection, SectionTitle } from '../components/UI/Animations';
 import ArchitecturalLines from '../components/UI/ArchitecturalLines';
 import FounderPortrait from '../components/UI/FounderPortrait';
+import CosmicSkeleton from '../components/UI/CosmicSkeleton';
 import { courseService, productService } from '../services/api';
 import { API_BASE_URL } from '../config';
 import { useState, useEffect } from 'react';
@@ -103,19 +104,25 @@ export default function Home() {
                         className="hero-image-wrapper"
                         style={{ y: y1 }}
                     >
-                        <img
-                            src={hero.image_url || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600"}
-                            alt="Tailoring craftsmanship"
-                            className="hero-image"
-                        />
-                        <motion.div 
-                            className="hero-float-card"
-                            animate={{ y: [0, -15, 0] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <Scissors size={24} />
-                            <span>{stats.students_display || '0'} Users</span>
-                        </motion.div>
+                        {hero.image_url ? (
+                            <>
+                                <img
+                                    src={hero.image_url}
+                                    alt="Tailoring craftsmanship"
+                                    className="hero-image"
+                                />
+                                <motion.div 
+                                    className="hero-float-card"
+                                    animate={{ y: [0, -15, 0] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Scissors size={24} />
+                                    <span>{stats.students_display || '0'} Users</span>
+                                </motion.div>
+                            </>
+                        ) : (
+                            <CosmicSkeleton className="hero-skeleton" />
+                        )}
                     </motion.div>
                 </div>
             </section>
