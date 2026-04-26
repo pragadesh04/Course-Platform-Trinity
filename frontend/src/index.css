@@ -474,7 +474,7 @@ input::placeholder, textarea::placeholder {
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(135deg, var(--galactic-violet), var(--nebula-purple);
+    background: linear-gradient(135deg, var(--galactic-violet), var(--nebula-purple));
     z-index: -1;
     opacity: 0;
     transition: opacity var(--transition-normal, 0.3s ease);
